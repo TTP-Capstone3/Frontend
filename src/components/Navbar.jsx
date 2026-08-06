@@ -8,8 +8,7 @@ import { NavLink } from 'react-router';
 // component this simple is easy to reason about and easy to reuse.
 export default function Navbar({ user, onLogout }) {
   const linkClass = ({ isActive }) =>
-    `px-3 py-2 rounded-md text-sm font-medium ${
-      isActive ? 'text-(--accent)' : 'hover:text-(--text-h)'
+    `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'text-(--accent)' : 'hover:text-(--text-h)'
     }`;
 
   return (
@@ -26,14 +25,11 @@ export default function Navbar({ user, onLogout }) {
         <NavLink to='/' end className={linkClass}>
           Home
         </NavLink>
-        <NavLink to='/tasks' className={linkClass}>
-          Tasks
-        </NavLink>
 
         {/* Only show the protected link once someone is logged in. */}
         {user && (
           <NavLink to='/protected' className={linkClass}>
-            Protected
+            My Calendar
           </NavLink>
         )}
 

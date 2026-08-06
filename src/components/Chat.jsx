@@ -1,0 +1,1 @@
+//right panel — messages, chips, compose
