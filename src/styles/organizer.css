@@ -1,0 +1,48 @@
+/* Minimal layout only — just enough for the organizer panel to render
+   correctly (form fields in a row, item rows laid out, list markers off).
+   No colors, borders, or other decoration. */
+
+.organizer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.organizer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.organizer-form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.organizer-form-row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.organizer-date-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.organizer-item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.organizer-item {
+  display: flex;
+  gap: 8px;
+}
+
+.organizer-item-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}

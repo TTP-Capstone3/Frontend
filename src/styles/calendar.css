@@ -1,0 +1,9 @@
+/* react-big-calendar has no auto height without this it renders nothing. */
+.calendar-panel {
+  height: 75vh;
+  min-height: 500px;
+}
+
+.calendar-panel .rbc-calendar {
+  height: 100%;
+}

@@ -1,8 +1,6 @@
-// middle panel - grid, tags, agenda strip
-
 import { useState } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import DragAndDropAddon from 'react-big-calendar/lib/addons/dragAndDrop';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
@@ -16,28 +14,31 @@ import { useSchedule } from '../context/ScheduleContext';
 // date-fns adapter required by react-big-calendar
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
-// wrap Calendar once so drag/resize handlers become available
+const withDragAndDrop = DragAndDropAddon.default ?? DragAndDropAddon;
+// Wrap Calendar so drag/resize handlers become available.
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export default function MyCalendar() {
-    const [view, setView] = useState('month'); // month/week/day toggle
-    const [date, setDate] = useState(new Date()); // currently focused date
+    const [view, setView] = useState('month');
+    const [date, setDate] = useState(new Date());
     const { scheduleItems, updateItem } = useSchedule();
 
-    // map schedule items -> RBC event shape, skipping items with no date at all
+    // Map schedule items to RBC's event shape, skipping items with no date.
     const events = scheduleItems
         .filter((item) => item.startAt || item.dueAt)
         .map((item) => ({
             id: item.id,
             title: item.title,
-            start: new Date(item.startAt || item.dueAt), // fall back to due date if no start
-            end: new Date(item.endAt || item.startAt || item.dueAt), // default to a zero-length event
+            start: new Date(item.startAt || item.dueAt),
+            end: new Date(item.endAt || item.startAt || item.dueAt),
             allDay: item.allDay,
         }));
 
-    // persist new time when an event is dragged to a different slot
+    // Save the new time when an event is dragged to a different slot.
     const onEventDrop = ({ event, start, end }) => {
-        updateItem(event.id, { startAt: start, endAt: end });
+        updateItem(event.id, { startAt: start, endAt: end }).catch((err) =>
+            console.error('Could not save the moved event:', err.message),
+        );
     };
 
     return (
@@ -51,8 +52,9 @@ export default function MyCalendar() {
                 onView={setView}
                 date={date}
                 onNavigate={setDate}
+                messages={{ previous: '←', next: '→' }}
                 resizable
-                draggableAccessor={() => true} // every event can be dragged
+                draggableAccessor={() => true} // all events are draggable
             />
         </div>
     );

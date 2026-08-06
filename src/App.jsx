@@ -9,6 +9,7 @@ import ProtectedPage from './pages/ProtectedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import { ScheduleProvider } from './context/ScheduleContext';
 import { getMe, syncUser, logoutRequest } from './api/auth';
 
 // App does two things:
@@ -142,12 +143,16 @@ function App() {
         <Route path='/login' element={<Login setUser={setUser} />} />
         <Route path='/signup' element={<Signup setUser={setUser} />} />
 
-        {/* Only reachable when logged in — ProtectedRoute redirects otherwise. */}
+        {/* Only reachable when logged in — ProtectedRoute redirects otherwise.
+            ScheduleProvider is scoped here (not in main.jsx) because the
+            calendar's data is only meaningful for a logged-in user. */}
         <Route
           path='/protected'
           element={
             <ProtectedRoute user={user} isLoading={isLoading}>
-              <ProtectedPage user={user} />
+              <ScheduleProvider>
+                <ProtectedPage user={user} />
+              </ScheduleProvider>
             </ProtectedRoute>
           }
         />
