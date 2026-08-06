@@ -1,0 +1,23 @@
+.ics-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ics-toolbar-button {
+    padding: 6px 12px;
+}
+
+.protected-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .protected-layout {
+        grid-template-columns: 260px 1fr;
+        align-items: start;
+    }
+}
