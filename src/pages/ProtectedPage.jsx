@@ -13,19 +13,11 @@ export default function ProtectedPage() {
   return (
     <>
       <section className="protected-layout">
-        <Organizer />
+        <Organizer onAddItem={() => setIsCreateModalOpen(true)}/>
 
         <MyCalendar />
       </section>
-
-      <div className="planner-main">
-        <div className="planner-toolbar">
-          <button type="button" onClick={() => setIsCreateModalOpen(true)}>
-            + Add item
-          </button>
-        </div>
-      </div>
-
+      
       {isCreateModalOpen && (
         <ScheduleItemModal onClose={() => setIsCreateModalOpen(false)}/>
       )}

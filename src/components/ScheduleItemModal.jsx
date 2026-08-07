@@ -18,6 +18,7 @@ const ITEM_TYPES = [
   { value: 'note', label: 'Note' },
 ];
 
+// Converts a datetime-local value to an ISO string for the backend.
 function toIso(value) {
   return value ? new Date(value).toISOString() : undefined
 }
