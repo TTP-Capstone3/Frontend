@@ -2,6 +2,17 @@
    correctly (form fields in a row, item rows laid out, list markers off).
    No colors, borders, or other decoration. */
 
+.organizer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.organizer-header h2 {
+  margin: 0;
+}
+
 .organizer-panel {
   display: flex;
   flex-direction: column;

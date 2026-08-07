@@ -13,85 +13,13 @@ const GROUPS = [
   { type: 'note', label: 'Notes' },
 ];
 
-//priorities
-const PRIORITIES = ['none', 'very low', 'low', 'medium', 'high', 'very high'];
-
 // The most relevant date for an item, used for sorting and display.
 function itemDate(item) {
   return item.dueAt || item.startAt || item.reminderAt || item.createdAt;
 }
 
-// Converts a datetime-local value to an ISO string for the backend.
-function toIso(localDateTimeValue) {
-  return localDateTimeValue ? new Date(localDateTimeValue).toISOString() : undefined;
-}
-
-export default function Organizer() {
-  const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } =
-    useSchedule();
-
-
-  const [title, setTitle] = useState('');
-  const [itemType, setItemType] = useState('task');
-  const [priority, setPriority] = useState('none');
-  const [dueAt, setDueAt] = useState('');
-  const [startAt, setStartAt] = useState('');
-  const [endAt, setEndAt] = useState('');
-  const [reminderAt, setReminderAt] = useState('');
-  const [formError, setFormError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  function resetForm() {
-    setTitle('');
-    setPriority('none');
-    setDueAt('');
-    setStartAt('');
-    setEndAt('');
-    setReminderAt('');
-    setFormError(null);
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    // Validation
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      setFormError('Title is required.');
-      return;
-    }
-    if (itemType === 'event' && (!startAt || !endAt)) {
-      setFormError('Events need both a start and an end time.');
-      return;
-    }
-    if (itemType === 'event' && new Date(endAt) <= new Date(startAt)) {
-      setFormError('The end time has to be after the start time.');
-      return;
-    }
-    if (itemType === 'reminder' && !reminderAt) {
-      setFormError('Reminders need a time.');
-      return;
-    }
-
-    setFormError(null);
-    setIsSubmitting(true);
-    try {
-      await addItem({
-        title: trimmedTitle,
-        itemType,
-        priority,
-        dueAt: toIso(dueAt),
-        startAt: toIso(startAt),
-        endAt: toIso(endAt),
-        reminderAt: toIso(reminderAt),
-      });
-      resetForm();
-    } catch (err) {
-      setFormError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+export default function Organizer({ onAddItem }) {
+  const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } = useSchedule();
 
   // The tasks have a checkbox the others dont
   async function toggleComplete(item) {
@@ -126,96 +54,13 @@ export default function Organizer() {
 
   return (
     <aside className="organizer-panel">
-      <h2>Organizer</h2>
+      <div className="organizer-header">
+        <h2>Organizer</h2>
 
-      <form className="organizer-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Add a task, event, reminder, or note…"
-          aria-label="Title"
-          className="organizer-input"
-        />
-
-        <div className="organizer-form-row">
-          <select
-            value={itemType}
-            onChange={(e) => setItemType(e.target.value)}
-            aria-label="Type"
-            className="organizer-select"
-          >
-            {GROUPS.map(({ type, label }) => (
-              <option key={type} value={type}>
-                {label.slice(0, -1) /* singular */}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            aria-label="Priority"
-            className="organizer-select"
-          >
-            {PRIORITIES.map((p) => (
-              <option key={p} value={p}>
-                {p === 'none' ? 'No priority' : p}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Show date field(s) for the selected type. */}
-        {itemType === 'task' && (
-          <label className="organizer-date-field">
-            Due
-            <input
-              type="datetime-local"
-              value={dueAt}
-              onChange={(e) => setDueAt(e.target.value)}
-            />
-          </label>
-        )}
-
-        {itemType === 'event' && (
-          <div className="organizer-form-row">
-            <label className="organizer-date-field">
-              Start
-              <input
-                type="datetime-local"
-                value={startAt}
-                onChange={(e) => setStartAt(e.target.value)}
-              />
-            </label>
-            <label className="organizer-date-field">
-              End
-              <input
-                type="datetime-local"
-                value={endAt}
-                onChange={(e) => setEndAt(e.target.value)}
-              />
-            </label>
-          </div>
-        )}
-
-        {itemType === 'reminder' && (
-          <label className="organizer-date-field">
-            Remind me at
-            <input
-              type="datetime-local"
-              value={reminderAt}
-              onChange={(e) => setReminderAt(e.target.value)}
-            />
-          </label>
-        )}
-
-        {formError && <p className="organizer-form-error">{formError}</p>}
-
-        <button type="submit" disabled={isSubmitting} className="organizer-add-button">
-          {isSubmitting ? 'Adding…' : 'Add'}
+        <button type="button" className="organizer-add-button" onClick={onAddItem}>
+          + Add item
         </button>
-      </form>
+      </div>
 
       {isLoading && <p className="organizer-status">Loading your schedule…</p>}
 
