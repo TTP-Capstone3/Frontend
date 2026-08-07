@@ -1,0 +1,74 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 0.5);
+}
+
+.modal-card {
+  width: min(520px, calc(100% - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 20px;
+  background: #1f2028;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.schedule-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.schedule-item-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.schedule-item-field input,
+.schedule-item-field select,
+.schedule-item-field textarea {
+  width: 100%;
+  border: 1px solid color-mix(
+    in srgb,
+    currentColor 25%,
+    transparent
+  );
+  border-radius: 6px;
+  padding: 8px;
+  outline: 1px solid currentColor;
+}
+
+.schedule-item-field textarea {
+  min-height: 56px;
+  resize: vertical;
+}
+
+.schedule-item-form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.schedule-item-form-row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-item-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
