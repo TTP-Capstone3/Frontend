@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
 // NavLink is like an <a> tag but for client-side routing: it navigates without
@@ -7,6 +8,23 @@ import { NavLink } from 'react-router';
 // anything or know how you logged in — it just renders what it's handed. A
 // component this simple is easy to reason about and easy to reuse.
 export default function Navbar({ user, onLogout }) {
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  }
+
   const linkClass = ({ isActive }) =>
     `px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'text-(--accent)' : 'hover:text-(--text-h)'
     }`;
@@ -25,6 +43,9 @@ export default function Navbar({ user, onLogout }) {
         <NavLink to='/' end className={linkClass}>
           Home
         </NavLink>
+        <NavLink to='/about' className={linkClass}>
+          About
+        </NavLink>
 
         {/* Only show the protected link once someone is logged in. */}
         {user && (
@@ -32,6 +53,13 @@ export default function Navbar({ user, onLogout }) {
             My Calendar
           </NavLink>
         )}
+
+        <button
+          onClick={toggleTheme}
+          className='rounded-md px-3 py-2 text-sm font-medium hover:text-(--text-h)'
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
 
         {/* Auth controls: your name + Log out, or the Log in / Sign up pair. */}
         {user ? (

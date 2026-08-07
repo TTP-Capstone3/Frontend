@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedPage from './pages/ProtectedPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -137,6 +138,7 @@ function App() {
         }
       >
         <Route path='/' element={<HomePage />} />
+        <Route path='/about' element={<AboutPage />} />
 
         {/* Public on purpose: you can reach these while logged OUT.
             They get setUser so they can report a successful login back up. */}
