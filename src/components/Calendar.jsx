@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import DragAndDropAddon from 'react-big-calendar/lib/addons/dragAndDrop';
 import format from 'date-fns/format';
@@ -18,10 +18,25 @@ const withDragAndDrop = DragAndDropAddon.default ?? DragAndDropAddon;
 // Wrap Calendar so drag/resize handlers become available.
 const DnDCalendar = withDragAndDrop(Calendar);
 
-export default function MyCalendar() {
+export default function MyCalendar({ onEditItem }) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
     const { scheduleItems, updateItem } = useSchedule();
+
+    const [selectedItem, setSelectedItem] = useState(null);
+    const calendarRef = useRef(null)
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+                setSelectedItem(null);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [])
 
     // Map schedule items to RBC's event shape, skipping items with no date.
     const events = scheduleItems
@@ -32,6 +47,7 @@ export default function MyCalendar() {
             start: new Date(item.startAt || item.dueAt),
             end: new Date(item.endAt || item.startAt || item.dueAt),
             allDay: item.allDay,
+            scheduleItem: item,
         }));
 
     // Save the new time when an event is dragged to a different slot.
@@ -41,21 +57,40 @@ export default function MyCalendar() {
         );
     };
 
+    function handleNavigate(newDate) {
+        setDate(newDate);
+        setSelectedItem(null);
+    }
+    
+    function handleView(newView) {
+        setView(newView);
+        setSelectedItem(null);
+    }
+
     return (
-        <div className="calendar-panel">
+        <div ref={calendarRef} className="calendar-panel">
             <DnDCalendar
                 localizer={localizer}
                 events={events}
                 onEventDrop={onEventDrop}
                 views={['month', 'week', 'day']}
                 view={view}
-                onView={setView}
+                onView={handleView}
+                onNavigate={handleNavigate}
                 date={date}
-                onNavigate={setDate}
                 messages={{ previous: '←', next: '→' }}
                 resizable
                 draggableAccessor={() => true} // all events are draggable
+                onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}
+                onSelectSlot={() => setSelectedItem(null)}
             />
+
+            {selectedItem && (
+                <div className="calendar-selection-actions">
+                    <span>{selectedItem.title}</span>
+                    <button type="button" onClick={() => onEditItem(selectedItem)}> Edit </button>
+                </div>
+            )}
         </div>
     );
 }

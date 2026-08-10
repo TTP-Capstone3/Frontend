@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Modal from './Modal';
 import { useSchedule } from '../context/ScheduleContext';
+import format from 'date-fns/format';
 import '../styles/schedule_modal.css';
 
 const PRIORITIES = [
@@ -23,6 +24,7 @@ function toIso(value) {
   return value ? new Date(value).toISOString() : undefined
 }
 
+// Converts value into date input format.
 function toDateTimeInput(value) {
   if (!value) return '';
   return format(new Date(value), "yyyy-MM-dd'T'HH:mm");
@@ -130,7 +132,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
       const item = buildScheduleItem();
       if (isEditing) {
-        await updateItem(item);
+        await updateItem(itemToEdit.id, item);
       } else {
         await addItem(item);
       }
