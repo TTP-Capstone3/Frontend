@@ -7,19 +7,47 @@ import '../App.css';
 
 // The main page once logged in. Organizer on the left, calendar filling the
 export default function ProtectedPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null)
+
+  // Opens the schedule-item modal for adding a new schedule item.
+  function openCreateModal() {
+    setEditingItem(null)
+    setIsModalOpen(true)
+  }
+
+  // Opens the schedule-item modal when an item is already selected prefilling its fields.
+  function openEditModal(item) {
+    setEditingItem(item)
+    setIsModalOpen(true)
+  }
+  
+  // Closes the modal.
+  function closeModal() {
+    setEditingItem(null)
+    setIsModalOpen(false)
+  }
 
   return (
     <>
       <section className="protected-layout">
-        <Organizer onAddItem={() => setIsCreateModalOpen(true)}/>
+        <Organizer 
+          onAddItem={openCreateModal}
+          onEditItem={openEditModal}
+        />
 
-        <MyCalendar />
+        <MyCalendar 
+          onEditItem={openEditModal}
+        />
+
         <Chat />
       </section>
       
-      {isCreateModalOpen && (
-        <ScheduleItemModal onClose={() => setIsCreateModalOpen(false)}/>
+      {isModalOpen && (
+        <ScheduleItemModal 
+          itemToEdit={editingItem}
+          onClose={closeModal}
+        />
       )}
 
       <div className="ics-toolbar">

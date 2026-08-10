@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Modal from './Modal';
 import { useSchedule } from '../context/ScheduleContext';
+import format from 'date-fns/format';
 import '../styles/schedule_modal.css';
 
 const PRIORITIES = [
@@ -23,30 +24,38 @@ function toIso(value) {
   return value ? new Date(value).toISOString() : undefined
 }
 
-export default function ScheduleItemModal({ onClose }) {
+// Converts value into date input format.
+function toDateTimeInput(value) {
+  if (!value) return '';
+  return format(new Date(value), "yyyy-MM-dd'T'HH:mm");
+}
+
+export default function ScheduleItemModal({ onClose, itemToEdit }) {
   const { addItem, updateItem } = useSchedule();
 
   // Common fields
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [itemType, setItemType] = useState('task');
-  const [priority, setPriority] = useState('none');
+  const [title, setTitle] = useState(itemToEdit?.title || '');
+  const [description, setDescription] = useState(itemToEdit?.description || '');
+  const [itemType, setItemType] = useState(itemToEdit?.itemType || 'task');
+  const [priority, setPriority] = useState(itemToEdit?.priority || 'none');
 
   // Task fields
-  const [dueAt, setDueAt] = useState('');
-  const [estimatedMinutes, setEstimatedMinutes] = useState('');
+  const [dueAt, setDueAt] = useState(toDateTimeInput(itemToEdit?.dueAt));
+  const [estimatedMinutes, setEstimatedMinutes] = useState(itemToEdit?.estimatedMinutes || '');
 
   // Event fields
-  const [startAt, setStartAt] = useState('');
-  const [endAt, setEndAt] = useState('');
-  const [location, setLocation] = useState('');
+  const [startAt, setStartAt] = useState(toDateTimeInput(itemToEdit?.startAt));
+  const [endAt, setEndAt] = useState(toDateTimeInput(itemToEdit?.endAt));
+  const [location, setLocation] = useState(itemToEdit?.location || '');
 
   // Reminder fields
-  const [reminderAt, setReminderAt] = useState('');
+  const [reminderAt, setReminderAt] = useState(toDateTimeInput(itemToEdit?.reminderAt));
 
   // Request state
   const [formError, setFormError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const isEditing = Boolean(itemToEdit);
 
   function validateForm() {
     if (!title.trim()) {
@@ -122,8 +131,12 @@ export default function ScheduleItemModal({ onClose }) {
       setFormError(null);
 
       const item = buildScheduleItem();
-      await addItem(item);
-
+      if (isEditing) {
+        await updateItem(itemToEdit.id, item);
+      } else {
+        await addItem(item);
+      }
+      
       onClose();
     } catch (error) {
       setFormError(error.message);
@@ -133,7 +146,7 @@ export default function ScheduleItemModal({ onClose }) {
   }
 
   return (
-    <Modal title="Add - Schedule item" onClose={onClose}>
+    <Modal title={isEditing ? "Edit - Schedule Item" : "Add - Schedule item"} onClose={onClose}>
       <form className="schedule-item-form" onSubmit={handleSubmit}>
         {/* Title */}
         <label className="schedule-item-field"> Title
@@ -157,7 +170,7 @@ export default function ScheduleItemModal({ onClose }) {
           />
         </label>
 
-        {/* Category */}
+        {/* Category (Will figure this out later) */}
         <label className="schedule-item-field">
             Category
             <select disabled>
@@ -290,7 +303,7 @@ export default function ScheduleItemModal({ onClose }) {
           </button>
 
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create'}
+            {isSubmitting ? isEditing ? 'Saving...' : 'Creating...' : isEditing ? 'Save Changes' : 'Create'}
           </button>
         </footer>
       </form>

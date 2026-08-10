@@ -18,7 +18,7 @@ function itemDate(item) {
   return item.dueAt || item.startAt || item.reminderAt || item.createdAt;
 }
 
-export default function Organizer({ onAddItem }) {
+export default function Organizer({ onAddItem, onEditItem }) {
   const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } = useSchedule();
 
   // The tasks have a checkbox the others dont
@@ -88,6 +88,7 @@ export default function Organizer({ onAddItem }) {
                 className={`organizer-item priority-${(item.priority || 'none').replace(' ', '-')} ${item.status === 'completed' ? 'is-completed' : ''
                   }`}
               >
+              <div className="organizer-item-body" onClick={() => onEditItem(item)}> Edit </div>
                 {item.itemType === 'task' && (
                   <input
                     type="checkbox"
