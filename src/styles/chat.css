@@ -1,0 +1,15 @@
+.chat-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-messages {
+    flex: 1;
+    min-height: 200px;
+}
+
+.chat-compose {
+    display: flex;
+    gap: 8px;
+}

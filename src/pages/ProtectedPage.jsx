@@ -1,12 +1,11 @@
 import MyCalendar from '../components/Calendar';
 import Organizer from '../components/Organizer';
+import Chat from '../components/Chat';
 import ScheduleItemModal from '../components/ScheduleItemModal';
 import { useState } from 'react';
 import '../App.css';
 
 // The main page once logged in. Organizer on the left, calendar filling the
-// rest — both share the same schedule data. Stacks on small screens, side by
-// side from `md` up.
 export default function ProtectedPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -16,6 +15,7 @@ export default function ProtectedPage() {
         <Organizer onAddItem={() => setIsCreateModalOpen(true)}/>
 
         <MyCalendar />
+        <Chat />
       </section>
       
       {isCreateModalOpen && (
