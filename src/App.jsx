@@ -138,7 +138,7 @@ function App() {
         }
       >
         <Route path='/' element={<HomePage />} />
-        <Route path='/about' element={<AboutPage />} />
+        <Route path='/about' element={<AboutPage user={user}/>} />
 
         {/* Public on purpose: you can reach these while logged OUT.
             They get setUser so they can report a successful login back up. */}
