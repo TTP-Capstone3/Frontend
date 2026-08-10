@@ -11,31 +11,31 @@ const aiFeatures = [
   {
     emoji: '💬',
     title: 'Just type it out',
-    description: '"Study for 2 hours tomorrow after 3pm" becomes a real scheduled task, no forms required.',
+    description: '"Study for 2 hours tomorrow after 3pm" becomes a real scheduled task, less inputs required.',
   },
   {
     emoji: '🗓️',
     title: 'Finds you the time',
-    description: 'The AI checks your calendar and slots new tasks into your actual free time.',
+    description: 'The AI checks your calendar and proposes new tasks into your actual free time.',
   },
   {
     emoji: '⚡',
-    title: 'Catches conflicts',
-    description: 'Double-booked yourself? The AI flags it and suggests a better time before it becomes a problem.',
+    title: 'Detects conflicts',
+    description: 'Double-booked yourself? The AI can detect it and suggest a better time before it becomes a problem.',
   },
 ];
 
-export default function AboutPage() {
+export default function AboutPage({ user }) {
   return (
     <section className='text-center'>
-      <h1 className='text-6xl'>Let AI plan your day.</h1>
+      <h1 className='text-6xl'>Plan your schedule with AI assistance.</h1>
       <p className='mb-4 text-lg'>
-        An AI task manager that turns your to-do list into an actual
+        A task manager that utlizies AI to turn your to-do list into an actual
         schedule.
       </p>
       <p className='mx-auto mb-10 max-w-md text-sm'>
-        Add tasks, events, and reminders in plain English. The AI slots them
-        into your day, catches conflicts before they happen, and finds you
+        Add your list of tasks, events, and reminders in plain English. The AI translates them into schedule items and
+        slots them into your schedule, catches conflicts before they happen, and finds you
         the free time to get it all done.
       </p>
 
@@ -73,8 +73,9 @@ export default function AboutPage() {
         ))}
       </div>
 
+      {/* If not logged in link to signup otherwise link to the calendar */}
       <Link
-        to='/signup'
+        to={user ? '/protected' : '/signup'}
         className='inline-block rounded-md bg-(--accent) px-5 py-2.5 font-medium text-white hover:bg-(--accent-border)'
       >
         Get started →
