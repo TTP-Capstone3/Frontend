@@ -28,17 +28,7 @@ const aiFeatures = [
 export default function AboutPage() {
   return (
     <section className='text-center'>
-      <span className='mb-4 inline-block rounded-full border border-[#ff6b4a] px-3 py-1 text-xs font-medium text-[#ff6b4a]'>
-        ✦ AI-powered scheduling
-      </span>
-
-      <h1 className='text-6xl'>
-        Let{' '}
-        <span className='underline decoration-[#ff6b4a] decoration-4 underline-offset-4'>
-          AI
-        </span>{' '}
-        plan your day.
-      </h1>
+      <h1 className='text-6xl'>Let AI plan your day.</h1>
       <p className='mb-4 text-lg'>
         An AI task manager that turns your to-do list into an actual
         schedule.
@@ -60,7 +50,7 @@ export default function AboutPage() {
             <div className='h-4 w-1/3 rounded bg-(--border)' />
             <div className='h-10 rounded border border-(--border) bg-(--bg)' />
             <div className='h-10 rounded border border-(--border) bg-(--bg)' />
-            <div className='h-10 w-2/3 rounded border-2 border-[#ff6b4a] bg-(--bg)' />
+            <div className='h-10 w-2/3 rounded border-2 border-(--accent) bg-(--bg)' />
           </div>
         </div>
 
@@ -68,7 +58,7 @@ export default function AboutPage() {
           <div className='space-y-1.5'>
             <div className='h-3 w-2/3 rounded bg-(--border)' />
             <div className='h-6 rounded border border-(--border) bg-(--bg)' />
-            <div className='h-6 rounded border-2 border-[#ff6b4a] bg-(--bg)' />
+            <div className='h-6 rounded border-2 border-(--accent) bg-(--bg)' />
           </div>
         </div>
       </div>
@@ -85,7 +75,7 @@ export default function AboutPage() {
 
       <Link
         to='/signup'
-        className='inline-block rounded-md bg-[#ff6b4a] px-5 py-2.5 font-medium text-white hover:bg-[#e85a3a]'
+        className='inline-block rounded-md bg-(--accent) px-5 py-2.5 font-medium text-white hover:bg-(--accent-border)'
       >
         Get started →
       </Link>
@@ -95,7 +85,7 @@ export default function AboutPage() {
         <div className='flex justify-center gap-4'>
           {team.map((member) => (
             <div key={member.initials} className='flex flex-col items-center gap-1.5'>
-              <div className='flex h-9 w-9 items-center justify-center rounded-full bg-[#ff6b4a] text-xs font-medium text-white'>
+              <div className='flex h-9 w-9 items-center justify-center rounded-full bg-(--accent) text-xs font-medium text-white'>
                 {member.initials}
               </div>
               <p className='text-xs'>{member.name}</p>
