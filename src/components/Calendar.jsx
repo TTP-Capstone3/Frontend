@@ -26,6 +26,7 @@ export default function MyCalendar({ onEditItem }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const calendarRef = useRef(null)
 
+    // This function deselects schedule-items when the mouse clicked anywhere else.
     useEffect(() => {
         function handleClickOutside(event) {
             if (calendarRef.current && !calendarRef.current.contains(event.target)) {
@@ -56,7 +57,7 @@ export default function MyCalendar({ onEditItem }) {
             console.error('Could not save the moved event:', err.message),
         );
     };
-
+    
     function handleNavigate(newDate) {
         setDate(newDate);
         setSelectedItem(null);
