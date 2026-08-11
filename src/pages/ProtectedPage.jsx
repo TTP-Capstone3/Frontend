@@ -111,7 +111,7 @@ export default function ProtectedPage() {
 
       <div className="ics-toolbar">
         {/* Import Button */}
-        <input type="button" className="ics-toolbar-button"
+        <input className="ics-toolbar-button"
           ref={fileInputRef}
           type="file"
           accept=".ics,text/calendar"
@@ -128,6 +128,11 @@ export default function ProtectedPage() {
           {isImporting ? 'Importing...' : 'Import .ics'}
         </button> 
 
+        {icsMessage && (
+          <p className="ics-message" role="status" aria-live="polite">
+            {icsMessage}
+          </p>
+        )}
 
         {/* Export Button */}
         <button
