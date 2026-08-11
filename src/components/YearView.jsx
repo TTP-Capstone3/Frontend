@@ -8,6 +8,7 @@ import startOfWeek from 'date-fns/startOfWeek';
 import endOfWeek from 'date-fns/endOfWeek';
 import isSameMonth from 'date-fns/isSameMonth';
 import isSameDay from 'date-fns/isSameDay';
+import isToday from 'date-fns/isToday';
 import addYears from 'date-fns/addYears';
 import subYears from 'date-fns/subYears';
 import format from 'date-fns/format';
@@ -25,13 +26,14 @@ function MonthMini({ month, events, onSelectDay }) {
         {days.map((day) => {
           const dayHasEvents = events.some((event) => isSameDay(event.start, day));
           const outsideMonth = !isSameMonth(day, month);
+          const isCurrentDay = isToday(day);
 
           return (
             <button
               key={day.toString()}
               type="button"
               onClick={() => onSelectDay(day)}
-              className={`year-view-day${outsideMonth ? ' is-outside' : ''}${dayHasEvents ? ' has-events' : ''}`}
+              className={`year-view-day${outsideMonth ? ' is-outside' : ''}${dayHasEvents ? ' has-events' : ''}${isCurrentDay ? ' is-today' : ''}`}
             >
               {format(day, 'd')}
             </button>
