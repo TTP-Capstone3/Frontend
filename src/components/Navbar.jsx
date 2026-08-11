@@ -31,7 +31,7 @@ export default function Navbar({ user, onLogout }) {
 
   return (
     <header className='border-b border-(--border)'>
-      <nav className='mx-auto flex max-w-3xl items-center gap-2 px-4 py-3'>
+      <nav className='mx-auto flex max-w-3xl flex-wrap items-center gap-2 px-4 py-3'>
         <NavLink
           to='/'
           className='mr-auto text-lg font-semibold text-(--text-h)'

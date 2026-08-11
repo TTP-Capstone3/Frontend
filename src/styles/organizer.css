@@ -30,7 +30,7 @@
   gap: 8px;
 }
 
-.organizer-form-row > * {
+.organizer-form-row>* {
   flex: 1;
   min-width: 0;
 }
@@ -44,11 +44,48 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .organizer-item {
   display: flex;
+  align-items: center;
   gap: 8px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(106, 106, 106, 0.097);
+}
+
+/* Left accent stripe colored by item type. */
+.organizer-item.type-event {
+  border-left: 4px solid #0f5854;
+
+}
+
+.organizer-item.type-task {
+  border-left: 4px solid hsl(214, 70%, 70%);
+
+}
+
+.organizer-item.type-reminder {
+  border-left: 4px solid #fab758;
+
+}
+
+.organizer-item.type-note {
+  border-left: 4px solid #dda7e3;
+
+}
+
+/* Struck through once a task is checked off or an event has ended. */
+.organizer-item.is-completed .organizer-item-title,
+.organizer-item.is-ended .organizer-item-title {
+  text-decoration: line-through;
+  opacity: 0.6;
 }
 
 .organizer-item-body {
@@ -56,4 +93,58 @@
   flex-direction: column;
   min-width: 0;
   flex: 1;
+}
+
+.organizer-item-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Small pencil button sitting right next to the title. */
+.organizer-item-edit {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: currentColor;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.organizer-item-edit:hover,
+.organizer-item-edit:focus-visible {
+  opacity: 1;
+}
+
+/* Priority dot shown to the left of the item title. */
+.organizer-item .priority-dot {
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+.priority-dot-very-low {
+  background: #60a5fa;
+}
+
+.priority-dot-low {
+  background: #34d399;
+}
+
+.priority-dot-medium {
+  background: #fbbf24;
+}
+
+.priority-dot-high {
+  background: #fb923c;
+}
+
+.priority-dot-very-high {
+  background: #f87171;
 }

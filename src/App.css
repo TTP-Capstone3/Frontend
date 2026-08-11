@@ -12,12 +12,49 @@
 .protected-layout {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 24px;
+    grid-template-areas:
+        "calendar"
+        "chat"
+        "organizer";
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 700px) {
+    .protected-layout {
+        gap: 24px;
+    }
+}
+
+.protected-layout .organizer-panel {
+    grid-area: organizer;
+}
+
+.protected-layout .calendar-panel {
+    grid-area: calendar;
+}
+
+.protected-layout .chat-bar {
+    grid-area: chat;
+}
+
+/* Organizer moves down to its own full-width row first; calendar and chat
+   pair up side by side. */
+@media (min-width: 700px) {
+    .protected-layout {
+        grid-template-columns: 1fr 280px;
+        grid-template-areas:
+            "calendar chat"
+            "organizer organizer";
+        align-items: stretch;
+    }
+}
+
+/* Widest: all three panels sit in a single row. */
+@media (min-width: 1000px) {
     .protected-layout {
         grid-template-columns: 260px 1fr 280px;
-        align-items: start;
+        grid-template-areas: "organizer calendar chat";
     }
 }

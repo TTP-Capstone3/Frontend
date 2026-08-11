@@ -18,6 +18,41 @@ function itemDate(item) {
   return item.dueAt || item.startAt || item.reminderAt || item.createdAt;
 }
 
+// True once an event's end (or start, if no end) has passed.
+function isEnded(item) {
+  if (item.itemType !== 'event') return false;
+  const end = item.endAt || item.startAt;
+  return Boolean(end) && new Date(end) < new Date();
+}
+
+// Keep items dated today or later; items with no date are kept (can't judge them).
+function isTodayOrFuture(item) {
+  const date = itemDate(item);
+  if (!date) return true;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return new Date(date) >= startOfToday;
+}
+
+// A small pencil icon for the edit button — sized/colored via CSS (currentColor).
+function EditIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="12"
+      height="12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+    </svg>
+  );
+}
+
 export default function Organizer({ onAddItem, onEditItem }) {
   const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } = useSchedule();
 
@@ -49,6 +84,7 @@ export default function Organizer({ onAddItem, onEditItem }) {
     label,
     items: scheduleItems
       .filter((item) => item.itemType === type)
+      .filter(isTodayOrFuture)
       .sort((a, b) => new Date(itemDate(a)) - new Date(itemDate(b))),
   })).filter((group) => group.items.length > 0);
 
@@ -82,13 +118,14 @@ export default function Organizer({ onAddItem, onEditItem }) {
             {label} <span className="organizer-group-count">{items.length}</span>
           </h3>
           <ul className="organizer-item-list">
-            {items.map((item) => (
+            {items.map((item) => {
+              const priorityClass = (item.priority || 'none').replace(' ', '-');
+              return (
               <li
                 key={item.id}
-                className={`organizer-item priority-${(item.priority || 'none').replace(' ', '-')} ${item.status === 'completed' ? 'is-completed' : ''
-                  }`}
+                className={`organizer-item type-${item.itemType} priority-${priorityClass} ${item.status === 'completed' ? 'is-completed' : ''
+                  } ${isEnded(item) ? 'is-ended' : ''}`}
               >
-              <div className="organizer-item-body" onClick={() => onEditItem(item)}> Edit </div>
                 {item.itemType === 'task' && (
                   <input
                     type="checkbox"
@@ -99,7 +136,20 @@ export default function Organizer({ onAddItem, onEditItem }) {
                   />
                 )}
                 <div className="organizer-item-body">
-                  <span className="organizer-item-title">{item.title}</span>
+                  <span className="organizer-item-title">
+                    {priorityClass !== 'none' && (
+                      <span className={`priority-dot priority-dot-${priorityClass}`} aria-hidden="true" />
+                    )}
+                    {item.title}
+                    <button
+                      type="button"
+                      className="organizer-item-edit"
+                      onClick={() => onEditItem(item)}
+                      aria-label={`Edit "${item.title}"`}
+                    >
+                      <EditIcon />
+                    </button>
+                  </span>
                   {itemDate(item) && (
                     <span className="organizer-item-date">
                       {format(new Date(itemDate(item)), 'MMM d, h:mm a')}
@@ -115,7 +165,8 @@ export default function Organizer({ onAddItem, onEditItem }) {
                   ×
                 </button>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </section>
       ))}
