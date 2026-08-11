@@ -10,6 +10,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../styles/calendar.css';
 import { useSchedule } from '../context/ScheduleContext';
+import YearView from './YearView';
 
 // date-fns adapter required by react-big-calendar
 const locales = { 'en-US': enUS };
@@ -94,12 +95,12 @@ export default function MyCalendar({ onEditItem }) {
                 localizer={localizer}
                 events={events}
                 onEventDrop={onEventDrop}
-                views={['month', 'week', 'day']}
+                views={{ year: YearView, month: true, week: true, day: true }}
                 view={view}
                 onView={handleView}
                 onNavigate={handleNavigate}
                 date={date}
-                messages={{ previous: '←', next: '→' }}
+                messages={{ previous: '←', next: '→', year: 'Year' }}
                 resizable
                 draggableAccessor={() => true} // all events are draggable
                 components={{ event: EventWithPriority }}
