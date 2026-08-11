@@ -11,6 +11,7 @@ import '../styles/calendar.css';
 import { useSchedule } from '../context/ScheduleContext';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth} from 'date-fns';
 import { getRecurringStarts  } from '../utils/recurrence';
+import YearView from './YearView';
 
 // date-fns adapter required by react-big-calendar
 const locales = { 'en-US': enUS };
@@ -139,12 +140,12 @@ export default function MyCalendar({ onEditItem }) {
                 localizer={localizer}
                 events={events}
                 onEventDrop={onEventDrop}
-                views={['month', 'week', 'day']}
+                views={{ year: YearView, month: true, week: true, day: true }}
                 view={view}
                 onView={handleView}
                 onNavigate={handleNavigate}
                 date={date}
-                messages={{ previous: '←', next: '→' }}
+                messages={{ previous: '←', next: '→', year: 'Year' }}
                 resizable
                 draggableAccessor={(event) => !event.isRecurringOccurrence} // all events are draggable except recurring occurences.
                 onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}
