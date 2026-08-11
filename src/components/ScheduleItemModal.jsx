@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Modal from './Modal';
 import { useSchedule } from '../context/ScheduleContext';
 import format from 'date-fns/format';
@@ -12,6 +12,15 @@ const PRIORITIES = [
   { value: 'high', label: 'High' },
   { value: 'very high', label: 'Very High' },
 ];
+
+// Same colors as the priority dots on the calendar/organizer, keyed by priority value.
+const PRIORITY_DOT_COLORS = {
+  'very low': '#60a5fa',
+  low: '#34d399',
+  medium: '#fbbf24',
+  high: '#fb923c',
+  'very high': '#f87171',
+};
 const ITEM_TYPES = [
   { value: 'task', label: 'Task' },
   { value: 'event', label: 'Event' },
@@ -22,6 +31,68 @@ const ITEM_TYPES = [
 // Converts a datetime-local value to an ISO string for the backend.
 function toIso(value) {
   return value ? new Date(value).toISOString() : undefined
+}
+function PriorityDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+  const selected = PRIORITIES.find((option) => option.value === value) || PRIORITIES[0];
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="priority-dropdown" ref={containerRef}>
+      <button
+        type="button"
+        className="priority-dropdown-trigger"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {PRIORITY_DOT_COLORS[selected.value] && (
+          <span
+            className="priority-dot"
+            style={{ background: PRIORITY_DOT_COLORS[selected.value] }}
+            aria-hidden="true"
+          />
+        )}
+        <span>{selected.label}</span>
+      </button>
+
+      {open && (
+        <ul className="priority-dropdown-menu" role="listbox">
+          {PRIORITIES.map((option) => (
+            <li
+              key={option.value}
+              role="option"
+              aria-selected={option.value === value}
+              className="priority-dropdown-option"
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+              }}
+            >
+              {PRIORITY_DOT_COLORS[option.value] && (
+                <span
+                  className="priority-dot"
+                  style={{ background: PRIORITY_DOT_COLORS[option.value] }}
+                  aria-hidden="true"
+                />
+              )}
+              <span>{option.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 // Converts value into date input format.
@@ -54,7 +125,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
   // Request state
   const [formError, setFormError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const isEditing = Boolean(itemToEdit);
 
   function validateForm() {
@@ -136,7 +207,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
       } else {
         await addItem(item);
       }
-      
+
       onClose();
     } catch (error) {
       setFormError(error.message);
@@ -172,10 +243,10 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
         {/* Category (Will figure this out later) */}
         <label className="schedule-item-field">
-            Category
-            <select disabled>
-                <option> Not implemented yet </option>
-            </select>
+          Category
+          <select disabled>
+            <option> Not implemented yet </option>
+          </select>
         </label>
 
         {/* Type + priority */}
@@ -198,16 +269,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
           <label className="schedule-item-field">
             Priority
 
-            <select
-              value={priority}
-              onChange={(event) => setPriority(event.target.value)}
-            >
-              {PRIORITIES.map((priorityOption) => (
-                <option key={priorityOption.value} value={priorityOption.value}>
-                  {priorityOption.label}
-                </option>
-              ))}
-            </select>
+            <PriorityDropdown value={priority} onChange={setPriority} />
           </label>
         </div>
 

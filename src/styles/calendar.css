@@ -1,11 +1,153 @@
-/* react-big-calendar has no auto height without this it renders nothing. */
 .calendar-panel {
   height: 75vh;
   min-height: 500px;
+  background-color: rgb(231, 231, 231);
+  border-radius: 4%;
+  padding: 15px;
+}
+
+@media (max-width: 480px) {
+  .calendar-panel {
+    min-height: 420px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .calendar-panel {
+    height: 100%;
+  }
 }
 
 .calendar-panel .rbc-calendar {
   height: 100%;
+}
+
+@media (max-width: 480px) {
+  .calendar-panel .rbc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .calendar-panel .rbc-toolbar .rbc-toolbar-label {
+    order: -1;
+    padding: 4px 0;
+  }
+
+  .calendar-panel .rbc-toolbar .rbc-btn-group {
+    display: flex;
+    justify-content: center;
+  }
+
+  .calendar-panel .rbc-btn-group button {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+}
+
+.calendar-panel .rbc-event {
+  padding: 1px 4px;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.calendar-panel .rbc-row-segment {
+  padding: 0 1px 1px;
+}
+
+/* Today: circle the date number instead of shading the whole cell. */
+.calendar-panel .rbc-today {
+  background-color: transparent;
+}
+
+.calendar-panel .rbc-date-cell.rbc-now {
+  font-weight: normal;
+}
+
+.calendar-panel .rbc-date-cell.rbc-now .rbc-button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #2563eb;
+  font-weight: 600;
+}
+
+/* Color each event by its item type — matches the organizer's accent stripes. */
+.calendar-panel .rbc-event.rbc-event-type-event {
+  background-color: #0f5854;
+  border-color: #0b403d;
+  color: #fff;
+}
+
+.calendar-panel .rbc-event.rbc-event-type-task {
+  background-color: hsl(214, 70%, 70%);
+  border-color: hsl(214, 70%, 55%);
+  color: #1f2028;
+}
+
+.calendar-panel .rbc-event.rbc-event-type-reminder {
+  background-color: #fab758;
+  border-color: #e0982f;
+  color: #1f2028;
+}
+
+.calendar-panel .rbc-event.rbc-event-type-note {
+  background-color: #dda7e3;
+  border-color: #c47dd1;
+  color: #1f2028;
+}
+
+/* Priority dot shown to the left of an event's title. */
+.rbc-event-inner {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.rbc-event-inner-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.priority-dot {
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.priority-dot-very-low {
+  background: #60a5fa;
+  /* blue */
+}
+
+.priority-dot-low {
+  background: #34d399;
+  /* green */
+}
+
+.priority-dot-medium {
+  background: #fbbf24;
+  /* yellow */
+}
+
+.priority-dot-high {
+  background: #fb923c;
+  /* orange */
+}
+
+.priority-dot-very-high {
+  background: #f87171;
+  /* red */
 }
 
 .year-view {

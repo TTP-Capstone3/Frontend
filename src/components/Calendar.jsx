@@ -20,6 +20,26 @@ const withDragAndDrop = DragAndDropAddon.default ?? DragAndDropAddon;
 // Wrap Calendar so drag/resize handlers become available.
 const DnDCalendar = withDragAndDrop(Calendar);
 
+// Renders a small colored dot before the title, sized by the item's priority.
+// No dot when priority is unset ('none' or missing).
+function EventWithPriority({ event }) {
+    const priority = (event.scheduleItem?.priority || 'none').replace(' ', '-');
+    return (
+        <span className="rbc-event-inner">
+            {priority !== 'none' && (
+                <span className={`priority-dot priority-dot-${priority}`} aria-hidden="true" />
+            )}
+            <span className="rbc-event-inner-title">{event.title}</span>
+        </span>
+    );
+}
+
+// Colors each event block by its item type (event/task/reminder/note).
+function eventPropGetter(event) {
+    const itemType = event.scheduleItem?.itemType || 'event';
+    return { className: `rbc-event-type-${itemType}` };
+}
+
 export default function MyCalendar({ onEditItem }) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
@@ -147,7 +167,9 @@ export default function MyCalendar({ onEditItem }) {
                 date={date}
                 messages={{ previous: '←', next: '→', year: 'Year' }}
                 resizable
-                draggableAccessor={(event) => !event.isRecurringOccurrence} // all events are draggable except recurring occurences.
+                draggableAccessor={() => true} // all events are draggable
+                components={{ event: EventWithPriority }}
+                eventPropGetter={eventPropGetter}
                 onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}
                 onSelectSlot={() => setSelectedItem(null)}
             />
