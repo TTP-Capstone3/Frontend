@@ -17,3 +17,8 @@
     display: flex;
     gap: 8px;
 }
+
+.chat-compose input {
+    flex: 1;
+    min-width: 0;
+}
