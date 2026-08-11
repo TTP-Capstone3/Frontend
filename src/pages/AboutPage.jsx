@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 
+// Shown in the "Built by" section at the bottom of the page.
 const team = [
   { initials: 'DL', name: 'Daniel L.' },
   { initials: 'JX', name: 'Jordan X.' },
@@ -7,6 +8,7 @@ const team = [
   { initials: 'DR', name: 'Dylan R.' },
 ];
 
+// The three feature cards shown below the mockup.
 const aiFeatures = [
   {
     emoji: '💬',
@@ -39,6 +41,7 @@ export default function AboutPage({ user }) {
         the free time to get it all done.
       </p>
 
+      {/* Placeholder app screenshot until we have a real one to swap in. */} {/*remove later after screenshot is added */}
       <div className='mx-auto mb-16 flex max-w-2xl items-end justify-center gap-4'>
         <div className='w-full rounded-lg border border-(--border) bg-(--code-bg) p-3'>
           <div className='mb-3 flex gap-1.5'>
@@ -63,6 +66,7 @@ export default function AboutPage({ user }) {
         </div>
       </div>
 
+      {/* One card per item in aiFeatures. */}
       <div className='mx-auto mb-16 grid max-w-2xl gap-8 text-left sm:grid-cols-3'>
         {aiFeatures.map((feature) => (
           <div key={feature.title}>
