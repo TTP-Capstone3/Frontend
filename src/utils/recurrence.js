@@ -1,4 +1,5 @@
-import { RRule } from 'rrule';
+import * as rrulePackage from 'rrule';
+const { RRule } = rrulePackage.default ?? rrulePackage;
 
 export const MAX_OCCURRENCES = 250;
 const DEFAULT_TIME_ZONE = 'America/New_York';
