@@ -10,7 +10,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../styles/calendar.css';
 import { useSchedule } from '../context/ScheduleContext';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth} from 'date-fns';
-import { RRule } from 'rrule';
+import { getRecurringStarts  } from '../utils/recurrence';
 
 // date-fns adapter required by react-big-calendar
 const locales = { 'en-US': enUS };
@@ -77,14 +77,9 @@ export default function MyCalendar({ onEditItem }) {
         }
 
         try {
-            // Using the RRule package to parse ICS recurrence rules and use the scheduleItem's start time
-            // as the starting point for generating repeated occurences.
-            const options = RRule.parseString(item.recurrenceRule);
-            options.dtstart = new Date(item.startAt);
-
-            const rule = new RRule(options);
-            // Only calculate occurrences currently relevant to the calendar view.
-            const occurrenceStarts = rule.between(rangeStart, rangeEnd, true);
+            // Generate occurrences using the event's timezone and stop after
+            // a safe maximum so dense recurrence rules cannot freeze the calendar.
+            const occurrenceStarts = getRecurringStarts(item, rangeStart, rangeEnd);
             const originalStart = new Date(item.startAt);
             const originalEnd = item.endAt ? new Date(item.endAt) : originalStart;
 
