@@ -3,13 +3,14 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import DragAndDropAddon from 'react-big-calendar/lib/addons/dragAndDrop';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
-import startOfWeek from 'date-fns/startOfWeek';
 import getDay from 'date-fns/getDay';
 import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../styles/calendar.css';
 import { useSchedule } from '../context/ScheduleContext';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth} from 'date-fns';
+import { getRecurringStarts  } from '../utils/recurrence';
 import YearView from './YearView';
 
 // date-fns adapter required by react-big-calendar
@@ -40,17 +41,81 @@ export default function MyCalendar({ onEditItem }) {
         };
     }, [])
 
-    // Map schedule items to RBC's event shape, skipping items with no date.
-    const events = scheduleItems
-        .filter((item) => item.startAt || item.dueAt)
-        .map((item) => ({
+    // Returns the date range currently visible in the calendar.
+    // Recurring events are only expanded inside this range so rules without
+    // a specified end date do not display an infinite number of occurrences.
+    function getVisibleRange(date, view) {
+        if (view === 'day') {
+            return { start: startOfDay(date), end: endOfDay(date)};
+        }
+        if (view === 'week') {
+            return { start: startOfWeek(date), end: endOfWeek(date)};
+        }   
+        return { start: startOfWeek(startOfMonth(date)), end: endOfWeek(endOfMonth(date))};
+    }
+
+    // Converts one scheduleItem into the event shape required by RBC.
+    // Keeps the original scheduleItem attached so selecting the calendar event
+    // can still open the original item for editing.
+    function makeCalendarEvent(item) {
+        return {
             id: item.id,
             title: item.title,
             start: new Date(item.startAt || item.dueAt),
             end: new Date(item.endAt || item.startAt || item.dueAt),
             allDay: item.allDay,
             scheduleItem: item,
-        }));
+            isRecurringOccurrence: false,
+        };
+    }
+
+    // Expand one recurring scheduleItem into temporary calendar events for the
+    // currently visible range. These occurrences are only used for display and
+    // the database still stores one single scheduleItem with its recurrenceRule.
+    function makeRecurringEvents(item, rangeStart, rangeEnd) {
+        if (!item.startAt || !item.recurrenceRule) {
+            return [];
+        }
+
+        try {
+            // Generate occurrences using the event's timezone and stop after
+            // a safe maximum so dense recurrence rules cannot freeze the calendar.
+            const occurrenceStarts = getRecurringStarts(item, rangeStart, rangeEnd);
+            const originalStart = new Date(item.startAt);
+            const originalEnd = item.endAt ? new Date(item.endAt) : originalStart;
+
+            // Preserve the original event duration for every generated occurrence.
+            const duration = originalEnd.getTime() - originalStart.getTime();
+
+            return occurrenceStarts.map((occurStart) => ({
+                id: `${item.id}-${occurStart.toISOString()}`,
+                title: item.title,
+                start: occurStart,
+                end: new Date(occurStart.getTime() + duration),
+                allDay: item.allDay,
+                scheduleItem: item,
+                isRecurringOccurrence: true,
+            }),
+            );
+        } catch (error) {
+            console.error(`Could not expand recurrence for item ${item.id}:`, error);
+            // Fallback to the original event if an imported RRULE is invalid instead of hiding it.
+            return [makeCalendarEvent(item)];
+        }
+    }
+
+    const visibleRange = getVisibleRange(date, view);
+
+    // Map schedule items to handle both RBC's event shape and recurring events.
+    // Normal items create one calendar event while recurring items generate occurences.
+    const events = scheduleItems
+        .filter((item) => item.startAt || item.dueAt)
+        .flatMap((item) => {
+            if (item.itemType === 'event' && item.recurrenceRule) {
+                return makeRecurringEvents(item, visibleRange.start, visibleRange.end);
+            }
+            return [makeCalendarEvent(item)];
+    });
 
     // Save the new time when an event is dragged to a different slot.
     const onEventDrop = ({ event, start, end }) => {
@@ -82,7 +147,7 @@ export default function MyCalendar({ onEditItem }) {
                 date={date}
                 messages={{ previous: '←', next: '→', year: 'Year' }}
                 resizable
-                draggableAccessor={() => true} // all events are draggable
+                draggableAccessor={(event) => !event.isRecurringOccurrence} // all events are draggable except recurring occurences.
                 onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}
                 onSelectSlot={() => setSelectedItem(null)}
             />
