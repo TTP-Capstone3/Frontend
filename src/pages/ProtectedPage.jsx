@@ -36,8 +36,7 @@ export default function ProtectedPage() {
     setEditingItem(null)
     setIsModalOpen(false)
   }
-
-  // Opens the file explorer 
+  
   async function handleImport(event) {
     const input = event.target;
     const file = input.files?.[0];
@@ -62,7 +61,6 @@ export default function ProtectedPage() {
     }
   }
 
-  // Create
   async function handleExport() {
     try {
       setIsExporting(true);
