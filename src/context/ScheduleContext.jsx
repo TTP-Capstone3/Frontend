@@ -61,6 +61,20 @@ export function ScheduleProvider({ children }) {
     setScheduleItems((items) => items.filter((item) => item.id !== id));
   }
 
+  async function refreshItems() {
+    try {
+      setError(null);
+
+      const items = await getScheduleItems();
+      setScheduleItems(items);
+
+      return items;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }
+
   return (
     <ScheduleContext.Provider
       value={{
@@ -70,6 +84,7 @@ export function ScheduleProvider({ children }) {
         addItem,
         updateItem,
         removeItem,
+        refreshItems,
       }}
     >
       {children}
