@@ -148,6 +148,8 @@
 .priority-dot-very-high {
   background: #f87171;
   /* red */
+}
+
 .year-view {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
