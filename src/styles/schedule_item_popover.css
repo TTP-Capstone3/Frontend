@@ -1,0 +1,80 @@
+.schedule-item-popover {
+    position: absolute;
+    z-index: 1000;
+    width: min(280px, calc(100vw - 24px));
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    text-align: left;
+}
+
+.schedule-item-popover-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.schedule-item-popover-header h3 {
+    margin: 2px 0 0;
+    color: var(--text-h);
+}
+
+.schedule-item-popover-type {
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+.schedule-item-popover-close {
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.schedule-item-popover-description {
+    margin: 10px 0;
+}
+
+.schedule-item-popover-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.schedule-item-popover-details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.schedule-item-popover-details span {
+    text-align: right;
+}
+
+.schedule-item-popover-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.schedule-item-popover-priority {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schedule-item-popover .priority-dot {
+    width: 8px;
+    height: 8px;
+}
+
+.schedule-item-popover-priority-label {
+    text-transform: capitalize;
+}

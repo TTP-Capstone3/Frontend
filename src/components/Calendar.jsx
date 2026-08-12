@@ -12,6 +12,7 @@ import { useSchedule } from '../context/ScheduleContext';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth} from 'date-fns';
 import { getRecurringStarts  } from '../utils/recurrence';
 import YearView from './YearView';
+import ScheduleItemPopover from './ScheduleItemPopover';
 
 // date-fns adapter required by react-big-calendar
 const locales = { 'en-US': enUS };
@@ -46,13 +47,23 @@ export default function MyCalendar({ onEditItem }) {
     const { scheduleItems, updateItem } = useSchedule();
 
     const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedOccurrence, setSelectedOccurrence] = useState(null);
+    const [popoverPosition, setPopoverPosition] = useState(null)
+
     const calendarRef = useRef(null)
+
+    function closePopover() {
+        setSelectedItem(null);
+        setSelectedOccurrence(null);
+        setPopoverPosition(null);
+    }
 
     // This function deselects schedule-items when the mouse clicked anywhere else.
     useEffect(() => {
         function handleClickOutside(event) {
             if (calendarRef.current && !calendarRef.current.contains(event.target)) {
                 setSelectedItem(null);
+                setPopoverPosition(null);
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
@@ -143,15 +154,34 @@ export default function MyCalendar({ onEditItem }) {
             console.error('Could not save the moved event:', err.message),
         );
     };
+
+    function handleSelectEvent(event, mouseEvent) {
+        const eventRect = mouseEvent.currentTarget.getBoundingClientRect();
+        const calendarRect = calendarRef.current.getBoundingClientRect();
+        const popoverWidth = 280;
+        const gap = 8;
+
+        let left = eventRect.right - calendarRect.left + gap;
+        const top = eventRect.top - calendarRect.top;
+
+        // Move the popover to the left if there is not enough room.
+        if (left + popoverWidth > calendarRect.width) {
+            left = eventRect.left - calendarRect.left - popoverWidth - gap;
+        }
+
+        setSelectedItem(event.scheduleItem);
+        setSelectedOccurrence({start: event.start, end: event.end});
+        setPopoverPosition({top, left: Math.max(gap, left)});
+    }
     
     function handleNavigate(newDate) {
         setDate(newDate);
-        setSelectedItem(null);
+        closePopover();
     }
     
     function handleView(newView) {
         setView(newView);
-        setSelectedItem(null);
+        closePopover();
     }
 
     return (
@@ -170,15 +200,18 @@ export default function MyCalendar({ onEditItem }) {
                 draggableAccessor={() => true} // all events are draggable
                 components={{ event: EventWithPriority }}
                 eventPropGetter={eventPropGetter}
-                onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}
-                onSelectSlot={() => setSelectedItem(null)}
+                onSelectEvent={handleSelectEvent}
+                onSelectSlot={closePopover}
             />
 
-            {selectedItem && (
-                <div className="calendar-selection-actions">
-                    <span>{selectedItem.title}</span>
-                    <button type="button" onClick={() => onEditItem(selectedItem)}> Edit </button>
-                </div>
+            {selectedItem && popoverPosition &&  (
+                <ScheduleItemPopover
+                    item={selectedItem}
+                    occurrence={selectedOccurrence}
+                    position={popoverPosition}
+                    onClose={closePopover}
+                    onEdit={onEditItem}
+                />
             )}
         </div>
     );
