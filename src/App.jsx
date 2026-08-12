@@ -137,8 +137,7 @@ function App() {
           <Layout user={user} onLogout={handleLogout} authError={authError} />
         }
       >
-        <Route path='/' element={<HomePage />} />
-        <Route path='/about' element={<AboutPage user={user}/>} />
+        <Route path='/' element={<AboutPage user={user}/>} />
 
         {/* Public on purpose: you can reach these while logged OUT.
             They get setUser so they can report a successful login back up. */}
