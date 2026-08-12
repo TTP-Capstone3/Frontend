@@ -8,7 +8,7 @@ function formatDateTime(value) {
     return format(new Date(value), 'MMM d, yyyy h:mm a');
 }
 
-export default function ScheduleItemPopover({item, occurrence, position, popoverRef, onClose, onEdit}) {
+export default function ScheduleItemPopover({item, occurrence, position, popoverRef, onClose, onEdit, onDelete}) {
 
     return (
         <div
@@ -107,13 +107,8 @@ export default function ScheduleItemPopover({item, occurrence, position, popover
             </div>
 
             <footer className="schedule-item-popover-actions">
-                <button type="button" onClick={() => onEdit(item)}>
-                    Edit
-                </button>
-
-                <button type="button" onClick={() => onEdit(item)}>
-                    Delete
-                </button>
+                <button type="button" onClick={() => onEdit(item)}> Edit </button>
+                <button type="button" onClick={() => onDelete(item)}> Delete </button>
             </footer>
         </div>
     );

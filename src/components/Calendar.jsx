@@ -41,7 +41,7 @@ function eventPropGetter(event) {
     return { className: `rbc-event-type-${itemType}` };
 }
 
-export default function MyCalendar({ onEditItem }) {
+export default function MyCalendar({ onEditItem, onRemoveItem }) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
     const { scheduleItems, updateItem } = useSchedule();
@@ -218,6 +218,7 @@ export default function MyCalendar({ onEditItem }) {
                     popoverRef={popoverRef}
                     onClose={closePopover}
                     onEdit={onEditItem}
+                    onDelete={onRemoveItem}
                 />
             )}
         </div>
