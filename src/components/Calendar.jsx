@@ -41,10 +41,10 @@ function eventPropGetter(event) {
     return { className: `rbc-event-type-${itemType}` };
 }
 
-export default function MyCalendar({ onEditItem, onRemoveItem }) {
+export default function MyCalendar({ onEditItem }) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
-    const { scheduleItems, updateItem } = useSchedule();
+    const { scheduleItems, updateItem, removeItem } = useSchedule();
 
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedOccurrence, setSelectedOccurrence] = useState(null);
@@ -57,6 +57,18 @@ export default function MyCalendar({ onEditItem, onRemoveItem }) {
         setSelectedItem(null);
         setSelectedOccurrence(null);
         setPopoverPosition(null);
+    }
+
+    async function handleDeleteItem(item) {
+        if (!window.confirm(`Delete "${item.title}"? This can't be undone.`)) {
+            return;
+        }
+        try {
+            await removeItem(item.id);
+            closePopover();
+        } catch (err) {
+            console.error('Could not delete item:', err.message);
+        }
     }
 
     // This function deselects schedule-items & popover when the mouse clicked anywhere else.
@@ -218,7 +230,7 @@ export default function MyCalendar({ onEditItem, onRemoveItem }) {
                     popoverRef={popoverRef}
                     onClose={closePopover}
                     onEdit={onEditItem}
-                    onDelete={onRemoveItem}
+                    onDelete={handleDeleteItem}
                 />
             )}
         </div>

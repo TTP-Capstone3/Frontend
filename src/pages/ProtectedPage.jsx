@@ -13,7 +13,7 @@ export default function ProtectedPage() {
   const [editingItem, setEditingItem] = useState(null)
 
   const fileInputRef = useRef(null)
-  const { refreshItems, removeItem } = useSchedule()
+  const { refreshItems } = useSchedule()
 
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -35,17 +35,6 @@ export default function ProtectedPage() {
   function closeModal() {
     setEditingItem(null)
     setIsModalOpen(false)
-  }
-
-  async function handleDelete(item) {
-    if (!window.confirm(`Delete "${item.title}"? This can't be undone.`)) {
-      return;
-    }
-    try {
-      await removeItem(item.id);
-    } catch (err) {
-      console.error('Could not delete item:', err.message);
-    }
   }
   
   async function handleImport(event) {
@@ -108,7 +97,6 @@ export default function ProtectedPage() {
 
         <MyCalendar 
           onEditItem={openEditModal}
-          onRemoveItem={handleDelete}
         />
 
         <Chat />
