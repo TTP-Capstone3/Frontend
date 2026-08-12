@@ -1,4 +1,5 @@
 .calendar-panel {
+  position: relative;
   height: 75vh;
   min-height: 500px;
   background-color: rgb(231, 231, 231);

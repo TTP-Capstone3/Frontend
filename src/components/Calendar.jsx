@@ -12,6 +12,7 @@ import { useSchedule } from '../context/ScheduleContext';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth} from 'date-fns';
 import { getRecurringStarts  } from '../utils/recurrence';
 import YearView from './YearView';
+import ScheduleItemPopover from './ScheduleItemPopover';
 
 // date-fns adapter required by react-big-calendar
 const locales = { 'en-US': enUS };
@@ -43,21 +44,43 @@ function eventPropGetter(event) {
 export default function MyCalendar({ onEditItem }) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
-    const { scheduleItems, updateItem } = useSchedule();
+    const { scheduleItems, updateItem, removeItem } = useSchedule();
 
     const [selectedItem, setSelectedItem] = useState(null);
-    const calendarRef = useRef(null)
+    const [selectedOccurrence, setSelectedOccurrence] = useState(null);
+    const [popoverPosition, setPopoverPosition] = useState(null)
 
-    // This function deselects schedule-items when the mouse clicked anywhere else.
+    const calendarRef = useRef(null)
+    const popoverRef = useRef(null)
+
+    function closePopover() {
+        setSelectedItem(null);
+        setSelectedOccurrence(null);
+        setPopoverPosition(null);
+    }
+
+    async function handleDeleteItem(item) {
+        if (!window.confirm(`Delete "${item.title}"? This can't be undone.`)) {
+            return;
+        }
+        try {
+            await removeItem(item.id);
+            closePopover();
+        } catch (err) {
+            console.error('Could not delete item:', err.message);
+        }
+    }
+
+    // This function deselects schedule-items & popover when the mouse clicked anywhere else.
     useEffect(() => {
         function handleClickOutside(event) {
-            if (calendarRef.current && !calendarRef.current.contains(event.target)) {
-                setSelectedItem(null);
+            if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+                closePopover()
             }
         }
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside, true);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside, true);
         };
     }, [])
 
@@ -143,19 +166,45 @@ export default function MyCalendar({ onEditItem }) {
             console.error('Could not save the moved event:', err.message),
         );
     };
+
+    function handleSelectEvent(event, mouseEvent) {
+        const eventRect = mouseEvent.currentTarget.getBoundingClientRect();
+        const calendarRect = calendarRef.current.getBoundingClientRect();
+        const popoverWidth = 280;
+        const gap = 8;
+
+        let left = (eventRect.left - calendarRect.left + eventRect.width / 2 - popoverWidth / 2);
+        const top = eventRect.bottom - calendarRect.top + gap;
+        left = Math.max(gap, left);
+
+        if (left + popoverWidth > calendarRect.width - gap) {
+            left = calendarRect.width - popoverWidth - gap;
+        }
+
+        setSelectedItem(event.scheduleItem);
+        setSelectedOccurrence({start: event.start, end: event.end});
+        setPopoverPosition({top, left: Math.max(gap, left)});
+    }
+
+    function handleCalendarMouseDown(event) {
+        if (popoverRef.current && popoverRef.current.contains(event.target)) {
+            return;
+        }
+        closePopover()
+    }
     
     function handleNavigate(newDate) {
         setDate(newDate);
-        setSelectedItem(null);
+        closePopover();
     }
     
     function handleView(newView) {
         setView(newView);
-        setSelectedItem(null);
+        closePopover();
     }
 
     return (
-        <div ref={calendarRef} className="calendar-panel">
+        <div ref={calendarRef} className="calendar-panel" onMouseDownCapture={handleCalendarMouseDown}>
             <DnDCalendar
                 localizer={localizer}
                 events={events}
@@ -170,15 +219,19 @@ export default function MyCalendar({ onEditItem }) {
                 draggableAccessor={() => true} // all events are draggable
                 components={{ event: EventWithPriority }}
                 eventPropGetter={eventPropGetter}
-                onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}
-                onSelectSlot={() => setSelectedItem(null)}
+                onSelectEvent={handleSelectEvent}
             />
 
-            {selectedItem && (
-                <div className="calendar-selection-actions">
-                    <span>{selectedItem.title}</span>
-                    <button type="button" onClick={() => onEditItem(selectedItem)}> Edit </button>
-                </div>
+            {selectedItem && popoverPosition &&  (
+                <ScheduleItemPopover
+                    item={selectedItem}
+                    occurrence={selectedOccurrence}
+                    position={popoverPosition}
+                    popoverRef={popoverRef}
+                    onClose={closePopover}
+                    onEdit={onEditItem}
+                    onDelete={handleDeleteItem}
+                />
             )}
         </div>
     );
