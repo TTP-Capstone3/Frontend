@@ -9,7 +9,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../styles/calendar.css';
 import { useSchedule } from '../context/ScheduleContext';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth} from 'date-fns';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear} from 'date-fns';
 import { getRecurringStarts  } from '../utils/recurrence';
 import YearView from './YearView';
 
@@ -67,22 +67,49 @@ export default function MyCalendar({ onEditItem }) {
     function getVisibleRange(date, view) {
         if (view === 'day') {
             return { start: startOfDay(date), end: endOfDay(date)};
-        }
-        if (view === 'week') {
+        } else if (view === 'week') {
             return { start: startOfWeek(date), end: endOfWeek(date)};
-        }   
+        } else if (view === 'year') {
+            return { start: startOfYear(date), end: endOfYear(date)};
+        }
         return { start: startOfWeek(startOfMonth(date)), end: endOfWeek(endOfMonth(date))};
+    }
+
+    // Returns the date used to place each schedule item on the calendar.
+    function getCalendarStart(item) {
+        if (item.itemType === 'event') {
+            return item.startAt;
+        } else if (item.itemType === 'task') {
+            return item.dueAt;
+        } else if (item.itemType === 'reminder') {
+            return item.reminderAt;
+        } else {
+            return null;
+        }
+    }
+
+    // Returns a display end time for react-big-calendar.
+    // Tasks and reminders only store one date, so their duration is visual only.
+    function getCalendarEnd(item, start) {
+        if (item.itemType === 'event' && item.endAt) {
+            return new Date(item.endAt);
+        }
+        const durationMinutes = item.itemType === 'task' && item.estimatedMinutes
+                ? item.estimatedMinutes
+                : 30;
+        return new Date(start.getTime() + durationMinutes * 60 * 1000);
     }
 
     // Converts one scheduleItem into the event shape required by RBC.
     // Keeps the original scheduleItem attached so selecting the calendar event
     // can still open the original item for editing.
     function makeCalendarEvent(item) {
+        const start = new Date(getCalendarStart(item))
         return {
             id: item.id,
             title: item.title,
-            start: new Date(item.startAt || item.dueAt),
-            end: new Date(item.endAt || item.startAt || item.dueAt),
+            start: start,
+            end: getCalendarEnd(item, start),
             allDay: item.allDay,
             scheduleItem: item,
             isRecurringOccurrence: false,
@@ -129,7 +156,7 @@ export default function MyCalendar({ onEditItem }) {
     // Map schedule items to handle both RBC's event shape and recurring events.
     // Normal items create one calendar event while recurring items generate occurences.
     const events = scheduleItems
-        .filter((item) => item.startAt || item.dueAt)
+        .filter((item) => getCalendarStart(item))
         .flatMap((item) => {
             if (item.itemType === 'event' && item.recurrenceRule) {
                 return makeRecurringEvents(item, visibleRange.start, visibleRange.end);
@@ -139,8 +166,44 @@ export default function MyCalendar({ onEditItem }) {
 
     // Save the new time when an event is dragged to a different slot.
     const onEventDrop = ({ event, start, end }) => {
-        updateItem(event.id, { startAt: start, endAt: end }).catch((err) =>
-            console.error('Could not save the moved event:', err.message),
+        const item = event.scheduleItem;
+        if (event.isRecurringOccurrence) {
+            return;
+        }
+
+        let changes = {};
+        if (item.itemType === 'event') {
+            changes = {
+                startAt: start.toISOString(),
+                endAt: end.toISOString(),
+            };
+        } else if (item.itemType === 'task') {
+            changes = {
+                dueAt: start.toISOString(),
+            };
+        } else if (item.itemType === 'reminder') {
+            changes = {
+                reminderAt: start.toISOString(),
+            };
+        } else {
+            return;
+        }
+
+        updateItem(item.id, changes).catch((err) =>
+            console.error('Could not save the moved item:', err.message),
+        );
+    };
+
+    // Handles the resizing of events on the calendar and updates their date and time.
+    const onEventResize = ({ event, start, end }) => {
+        const item = event.scheduleItem;
+        if (item.itemType !== 'event' || event.isRecurringOccurrence) {
+            return;
+        }
+
+        updateItem(item.id, {startAt: start.toISOString(), endAt: end.toISOString()})
+        .catch((err) =>
+            console.error('Could not resize the event:', err.message),
         );
     };
     
@@ -160,14 +223,17 @@ export default function MyCalendar({ onEditItem }) {
                 localizer={localizer}
                 events={events}
                 onEventDrop={onEventDrop}
+                onEventResize={onEventResize}
                 views={{ year: YearView, month: true, week: true, day: true }}
                 view={view}
                 onView={handleView}
                 onNavigate={handleNavigate}
                 date={date}
                 messages={{ previous: '←', next: '→', year: 'Year' }}
+                dayLayoutAlgorithm="no-overlap"
                 resizable
-                draggableAccessor={() => true} // all events are draggable
+                resizableAccessor={(event) => event.scheduleItem?.itemType === 'event' && !event.isRecurringOccurrence}
+                draggableAccessor={(event) => !event.isRecurringOccurrence} // all events are draggable except recurring ones (for now)
                 components={{ event: EventWithPriority }}
                 eventPropGetter={eventPropGetter}
                 onSelectEvent={(event) => setSelectedItem(event.scheduleItem)}

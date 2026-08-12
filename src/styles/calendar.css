@@ -58,6 +58,29 @@
   padding: 0 1px 1px;
 }
 
+/* Clearly marks the current time in week and day views. */
+.calendar-panel .rbc-current-time-indicator {
+    height: 3px;
+    background-color: #f87171;
+    z-index: 4;
+}
+
+.calendar-panel .rbc-current-time-indicator::after {
+    content: 'Now';
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #f87171;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
 /* Today: circle the date number instead of shading the whole cell. */
 .calendar-panel .rbc-today {
   background-color: transparent;
@@ -152,11 +175,23 @@
 
 .year-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   height: 100%;
   overflow-y: auto;
   padding: 8px;
+}
+
+@media (max-width: 900px) {
+    .year-view {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .year-view {
+        grid-template-columns: 1fr;
+    }
 }
 
 .year-view-month-title {
