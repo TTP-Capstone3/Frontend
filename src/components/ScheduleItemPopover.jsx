@@ -8,13 +8,13 @@ function formatDateTime(value) {
     return format(new Date(value), 'MMM d, yyyy h:mm a');
 }
 
-export default function ScheduleItemPopover({item, occurrence, position, onClose, onEdit}) {
+export default function ScheduleItemPopover({item, occurrence, position, popoverRef, onClose, onEdit}) {
 
     return (
         <div
+            ref={popoverRef}
             className="schedule-item-popover"
             style={{ top: position.top, left: position.left }}
-            onMouseDown={(event) => event.stopPropagation()}
         >
             <header className="schedule-item-popover-header">
                 <div>

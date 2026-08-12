@@ -13,7 +13,7 @@
   width: min(520px, calc(100% - 32px));
   max-height: 90vh;
   overflow-y: auto;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
   background: #1f2028;
 }
