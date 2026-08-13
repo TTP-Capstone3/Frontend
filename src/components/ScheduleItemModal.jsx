@@ -241,14 +241,6 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
           />
         </label>
 
-        {/* Category (Will figure this out later) */}
-        <label className="schedule-item-field">
-          Category
-          <select disabled>
-            <option> Not implemented yet </option>
-          </select>
-        </label>
-
         {/* Type + priority */}
         <div className="schedule-item-form-row">
           <label className="schedule-item-field"> Type
