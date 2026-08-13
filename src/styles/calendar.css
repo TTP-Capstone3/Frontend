@@ -1,10 +1,13 @@
 .calendar-panel {
   position: relative;
-  height: 75vh;
+  height: 80vh;
   min-height: 500px;
-  background-color: rgb(231, 231, 231);
+  background-color: rgba(106, 106, 106, 0.097);
   border-radius: 4%;
   padding: 15px;
+  /* Views like year (12 months) can be taller than month view — scroll
+     instead of growing the panel (and the organizer/chat next to it). */
+  overflow-y: auto;
 }
 
 @media (max-width: 480px) {
@@ -15,14 +18,51 @@
   }
 }
 
-@media (min-width: 768px) {
-  .calendar-panel {
-    height: 100%;
-  }
-}
-
 .calendar-panel .rbc-calendar {
   height: 100%;
+}
+
+/* Slightly smaller than react-big-calendar's default toolbar buttons
+   (Today, ←/→, Month/Week/Day/Year). */
+.calendar-panel .rbc-toolbar button {
+  padding: 0.15rem 0.5rem;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* the current month/period label. */
+.calendar-panel .rbc-toolbar .rbc-toolbar-label {
+  font-size: 25px;
+  font-weight: 600;
+  padding: 12px 0;
+}
+
+
+/* react-big-calendar hardcodes light grid lines (#ddd) — use the theme border color instead.
+   Covers month view (rbc-month-*, rbc-day-bg) as well as week/day view (rbc-time-*, rbc-timeslot-group)
+   so all views share the same line color. */
+.calendar-panel .rbc-month-view,
+.calendar-panel .rbc-month-row+.rbc-month-row,
+.calendar-panel .rbc-day-bg+.rbc-day-bg,
+.calendar-panel .rbc-header,
+.calendar-panel .rbc-header+.rbc-header,
+.calendar-panel .rbc-time-view,
+.calendar-panel .rbc-time-header.rbc-overflowing,
+.calendar-panel .rbc-time-header>.rbc-row:first-child,
+.calendar-panel .rbc-time-header>.rbc-row.rbc-row-resource,
+.calendar-panel .rbc-time-header-content,
+.calendar-panel .rbc-time-header-content>.rbc-row.rbc-row-resource,
+.calendar-panel .rbc-time-content,
+.calendar-panel .rbc-time-content>*+*>*,
+.calendar-panel .rbc-timeslot-group,
+.calendar-panel .rbc-time-view .rbc-allday-cell+.rbc-allday-cell,
+.calendar-panel .rbc-day-slot .rbc-time-slot {
+  border-color: var(--border);
+}
+
+/* Prev/next month filler cells: translucent grey instead of the library's opaque light grey. */
+.calendar-panel .rbc-off-range-bg {
+  background: rgba(122, 122, 122, 0.075);
 }
 
 @media (max-width: 480px) {
@@ -60,26 +100,46 @@
 }
 
 /* Clearly marks the current time in week and day views. */
+/* react-big-calendar hardcodes each time-grid row (rbc-timeslot-group) to a
+   40px floor, which is taller than 24 hourly rows can fit in the panel on
+   most screens, forcing an inner scrollbar in week/day view. The rows are
+   already flex-grow children of a column that fills the available height
+   (rbc-time-column { min-height: 100% }), so dropping the floor lets them
+   shrink just enough to fill the panel exactly — however little that is on
+   a given screen — instead of us guessing a fixed pixel value. */
+.calendar-panel .rbc-timeslot-group {
+  min-height: 1px;
+}
+
+/* The hour labels' inherited line-height (from the app's base text styles)
+   is taller than a single shrunk row, so it — not the 40px floor above —
+   ends up the real limit on how far the rows can shrink. Tightening it here
+   only affects the calendar's own time gutter. */
+.calendar-panel .rbc-time-gutter .rbc-label {
+  font-size: 11px;
+  line-height: 1;
+}
+
 .calendar-panel .rbc-current-time-indicator {
-    height: 3px;
-    background-color: #f87171;
-    z-index: 4;
+  height: 3px;
+  background-color: #f87171;
+  z-index: 4;
 }
 
 .calendar-panel .rbc-current-time-indicator::after {
-    content: 'Now';
-    position: absolute;
-    left: 50%;
-    right: auto;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: #f87171;
-    color: white;
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1.4;
+  content: 'Now';
+  position: absolute;
+  left: 50%;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f87171;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 /* Today: circle the date number instead of shading the whole cell. */
@@ -184,15 +244,15 @@
 }
 
 @media (max-width: 900px) {
-    .year-view {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .year-view {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 600px) {
-    .year-view {
-        grid-template-columns: 1fr;
-    }
+  .year-view {
+    grid-template-columns: 1fr;
+  }
 }
 
 .year-view-month-title {

@@ -1,12 +1,20 @@
 .ics-toolbar {
     display: flex;
-    justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 16px;
 }
 
 .ics-toolbar-button {
-    padding: 6px 12px;
+    padding: 4px 10px;
+    font-size: 0.85em;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(106, 106, 106, 0.097);
+}
+
+.ics-message {
+    flex-basis: 100%;
+    margin: 0;
 }
 
 .protected-layout {
@@ -21,12 +29,6 @@
     min-height: 0;
 }
 
-@media (min-width: 700px) {
-    .protected-layout {
-        gap: 24px;
-    }
-}
-
 .protected-layout .organizer-panel {
     grid-area: organizer;
 }
@@ -39,22 +41,76 @@
     grid-area: chat;
 }
 
-/* Organizer moves down to its own full-width row first; calendar and chat
-   pair up side by side. */
-@media (min-width: 700px) {
+/* Narrowest: one panel at a time, switched with the bottom nav below. */
+@media (max-width: 1200px) {
     .protected-layout {
-        grid-template-columns: 1fr 280px;
-        grid-template-areas:
-            "calendar chat"
-            "organizer organizer";
+        grid-template-areas: "panel";
+        padding-bottom: 12px;
+    }
+
+    .protected-layout .organizer-panel,
+    .protected-layout .calendar-panel,
+    .protected-layout .chat-bar {
+        grid-area: panel;
+        display: none;
+        min-height: 0;
+    }
+
+    .protected-layout[data-active-tab="organizer"] .organizer-panel,
+    .protected-layout[data-active-tab="calendar"] .calendar-panel,
+    .protected-layout[data-active-tab="chat"] .chat-bar {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Leaves room so the fixed bottom nav never covers the active panel. */
+    body:has(.protected-layout) {
+        padding-bottom: 56px;
+    }
+}
+
+/* Above the nav-bar breakpoint: all three panels sit in a single row. */
+@media (min-width: 1202px) {
+    .protected-layout {
+        gap: 24px;
+        grid-template-columns: 260px 1fr 280px;
+        grid-template-areas: "organizer calendar chat";
         align-items: stretch;
     }
 }
 
-/* Widest: all three panels sit in a single row. */
-@media (min-width: 1000px) {
-    .protected-layout {
-        grid-template-columns: 260px 1fr 280px;
-        grid-template-areas: "organizer calendar chat";
+/* Bottom tab nav — only shown at the single-panel breakpoint. */
+.bottom-nav {
+    display: none;
+}
+
+@media (max-width: 1202px) {
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 900;
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+    }
+
+    .bottom-nav-button {
+        flex: 1;
+        padding: 10px 4px;
+        border: none;
+        background: none;
+        color: inherit;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        opacity: 0.6;
+    }
+
+    .bottom-nav-button.is-active {
+        opacity: 1;
+        font-weight: 600;
+        box-shadow: inset 0 2px 0 #2563eb;
     }
 }

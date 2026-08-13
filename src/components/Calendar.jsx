@@ -9,8 +9,8 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../styles/calendar.css';
 import { useSchedule } from '../context/ScheduleContext';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear} from 'date-fns';
-import { getRecurringStarts  } from '../utils/recurrence';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
+import { getRecurringStarts } from '../utils/recurrence';
 import YearView from './YearView';
 import ScheduleItemPopover from './ScheduleItemPopover';
 
@@ -89,13 +89,13 @@ export default function MyCalendar({ onEditItem }) {
     // a specified end date do not display an infinite number of occurrences.
     function getVisibleRange(date, view) {
         if (view === 'day') {
-            return { start: startOfDay(date), end: endOfDay(date)};
+            return { start: startOfDay(date), end: endOfDay(date) };
         } else if (view === 'week') {
-            return { start: startOfWeek(date), end: endOfWeek(date)};
+            return { start: startOfWeek(date), end: endOfWeek(date) };
         } else if (view === 'year') {
-            return { start: startOfYear(date), end: endOfYear(date)};
+            return { start: startOfYear(date), end: endOfYear(date) };
         }
-        return { start: startOfWeek(startOfMonth(date)), end: endOfWeek(endOfMonth(date))};
+        return { start: startOfWeek(startOfMonth(date)), end: endOfWeek(endOfMonth(date)) };
     }
 
     // Returns the date used to place each schedule item on the calendar.
@@ -118,8 +118,8 @@ export default function MyCalendar({ onEditItem }) {
             return new Date(item.endAt);
         }
         const durationMinutes = item.itemType === 'task' && item.estimatedMinutes
-                ? item.estimatedMinutes
-                : 30;
+            ? item.estimatedMinutes
+            : 30;
         return new Date(start.getTime() + durationMinutes * 60 * 1000);
     }
 
@@ -185,7 +185,7 @@ export default function MyCalendar({ onEditItem }) {
                 return makeRecurringEvents(item, visibleRange.start, visibleRange.end);
             }
             return [makeCalendarEvent(item)];
-    });
+        });
 
     // Save the new time when an event is dragged to a different slot.
     const onEventDrop = ({ event, start, end }) => {
@@ -224,10 +224,10 @@ export default function MyCalendar({ onEditItem }) {
             return;
         }
 
-        updateItem(item.id, {startAt: start.toISOString(), endAt: end.toISOString()})
-        .catch((err) =>
-            console.error('Could not resize the event:', err.message),
-        );
+        updateItem(item.id, { startAt: start.toISOString(), endAt: end.toISOString() })
+            .catch((err) =>
+                console.error('Could not resize the event:', err.message),
+            );
     };
 
     function handleSelectEvent(event, mouseEvent) {
@@ -245,8 +245,8 @@ export default function MyCalendar({ onEditItem }) {
         }
 
         setSelectedItem(event.scheduleItem);
-        setSelectedOccurrence({start: event.start, end: event.end});
-        setPopoverPosition({top, left: Math.max(gap, left)});
+        setSelectedOccurrence({ start: event.start, end: event.end });
+        setPopoverPosition({ top, left: Math.max(gap, left) });
     }
 
     function handleCalendarMouseDown(event) {
@@ -255,12 +255,12 @@ export default function MyCalendar({ onEditItem }) {
         }
         closePopover()
     }
-    
+
     function handleNavigate(newDate) {
         setDate(newDate);
         closePopover();
     }
-    
+
     function handleView(newView) {
         setView(newView);
         closePopover();
@@ -280,6 +280,7 @@ export default function MyCalendar({ onEditItem }) {
                 date={date}
                 messages={{ previous: '←', next: '→', year: 'Year' }}
                 dayLayoutAlgorithm="no-overlap"
+                showMultiDayTimes
                 resizable
                 resizableAccessor={(event) => event.scheduleItem?.itemType === 'event' && !event.isRecurringOccurrence}
                 draggableAccessor={(event) => !event.isRecurringOccurrence} // all events are draggable except recurring ones (for now)
@@ -288,7 +289,7 @@ export default function MyCalendar({ onEditItem }) {
                 onSelectEvent={handleSelectEvent}
             />
 
-            {selectedItem && popoverPosition &&  (
+            {selectedItem && popoverPosition && (
                 <ScheduleItemPopover
                     item={selectedItem}
                     occurrence={selectedOccurrence}
