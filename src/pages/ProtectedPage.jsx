@@ -8,9 +8,17 @@ import '../App.css';
 import { useSchedule } from '../context/ScheduleContext';
 
 // The main page once logged in. Organizer on the left, calendar filling the
+// Panels shown by the bottom nav once the layout collapses to one at a time.
+const TABS = [
+  { key: 'organizer', label: 'Organizer' },
+  { key: 'calendar', label: 'Calendar' },
+  { key: 'chat', label: 'Chat' },
+];
+
 export default function ProtectedPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null)
+  const [activeTab, setActiveTab] = useState('calendar')
 
   const fileInputRef = useRef(null)
   const { refreshItems } = useSchedule()
@@ -87,63 +95,80 @@ export default function ProtectedPage() {
     }
   }
 
+  const icsToolbar = (
+    <div className="ics-toolbar">
+      {/* Import Button */}
+      <input className="ics-toolbar-button"
+        ref={fileInputRef}
+        type="file"
+        accept=".ics,text/calendar"
+        hidden
+        onChange={handleImport}
+      />
+
+      <button
+        type="button"
+        className="ics-toolbar-button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isImporting}
+      >
+        {isImporting ? 'Importing...' : 'Import .ics'}
+      </button>
+
+      {/* Export Button */}
+      <button
+        type="button"
+        className="ics-toolbar-button"
+        onClick={handleExport}
+        disabled={isExporting}
+      >
+        {isExporting ? 'Exporting...' : 'Export .ics'}
+      </button>
+
+      {icsMessage && (
+        <p className="ics-message" role="status" aria-live="polite">
+          {icsMessage}
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <>
-      <section className="protected-layout">
-        <Organizer 
+      <section className="protected-layout" data-active-tab={activeTab}>
+        <Organizer
           onAddItem={openCreateModal}
           onEditItem={openEditModal}
+          toolbar={icsToolbar}
         />
 
-        <MyCalendar 
+        <MyCalendar
           onEditItem={openEditModal}
         />
 
         <Chat />
       </section>
-      
+
+      <nav className="bottom-nav" aria-label="Panel navigation">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={`bottom-nav-button${activeTab === tab.key ? ' is-active' : ''}`}
+            aria-current={activeTab === tab.key ? 'page' : undefined}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
       {isModalOpen && (
-        <ScheduleItemModal 
+        <ScheduleItemModal
           itemToEdit={editingItem}
           onClose={closeModal}
         />
       )}
-
-      <div className="ics-toolbar">
-        {/* Import Button */}
-        <input className="ics-toolbar-button"
-          ref={fileInputRef}
-          type="file"
-          accept=".ics,text/calendar"
-          hidden
-          onChange={handleImport}
-        />
-
-        <button
-          type="button"
-          className="ics-toolbar-button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isImporting}
-        >
-          {isImporting ? 'Importing...' : 'Import .ics'}
-        </button> 
-
-        {icsMessage && (
-          <p className="ics-message" role="status" aria-live="polite">
-            {icsMessage}
-          </p>
-        )}
-
-        {/* Export Button */}
-        <button
-          type="button"
-          className="ics-toolbar-button"
-          onClick={handleExport}
-          disabled={isExporting}
-        >
-          {isExporting ? 'Exporting...' : 'Export .ics'}
-        </button>
-      </div>
     </>
 
   );

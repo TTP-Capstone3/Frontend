@@ -53,7 +53,7 @@ function EditIcon() {
   );
 }
 
-export default function Organizer({ onAddItem, onEditItem }) {
+export default function Organizer({ onAddItem, onEditItem, toolbar }) {
   const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } = useSchedule();
 
   // The tasks have a checkbox the others dont
@@ -90,6 +90,8 @@ export default function Organizer({ onAddItem, onEditItem }) {
 
   return (
     <aside className="organizer-panel">
+      {toolbar}
+
       <div className="organizer-header">
         <h2>Organizer</h2>
 
@@ -98,78 +100,80 @@ export default function Organizer({ onAddItem, onEditItem }) {
         </button>
       </div>
 
-      {isLoading && <p className="organizer-status">Loading your schedule…</p>}
+      <div className="organizer-body">
+        {isLoading && <p className="organizer-status">Loading your schedule…</p>}
 
-      {error && (
-        <p className="organizer-status organizer-status-error">
-          Couldn't load your schedule: {error}
-        </p>
-      )}
+        {error && (
+          <p className="organizer-status organizer-status-error">
+            Couldn't load your schedule: {error}
+          </p>
+        )}
 
-      {!isLoading && !error && groups.length === 0 && (
-        <p className="organizer-status">
-          Nothing here yet — add your first task, event, reminder, or note above.
-        </p>
-      )}
+        {!isLoading && !error && groups.length === 0 && (
+          <p className="organizer-status">
+            Nothing here yet — add your first task, event, reminder, or note above.
+          </p>
+        )}
 
-      {groups.map(({ type, label, items }) => (
-        <section key={type} className="organizer-group">
-          <h3>
-            {label} <span className="organizer-group-count">{items.length}</span>
-          </h3>
-          <ul className="organizer-item-list">
-            {items.map((item) => {
-              const priorityClass = (item.priority || 'none').replace(' ', '-');
-              return (
-              <li
-                key={item.id}
-                className={`organizer-item type-${item.itemType} priority-${priorityClass} ${item.status === 'completed' ? 'is-completed' : ''
-                  } ${isEnded(item) ? 'is-ended' : ''}`}
-              >
-                {item.itemType === 'task' && (
-                  <input
-                    type="checkbox"
-                    checked={item.status === 'completed'}
-                    onChange={() => toggleComplete(item)}
-                    aria-label={`Mark "${item.title}" as ${item.status === 'completed' ? 'not done' : 'done'
-                      }`}
-                  />
-                )}
-                <div className="organizer-item-body">
-                  <span className="organizer-item-title">
-                    {priorityClass !== 'none' && (
-                      <span className={`priority-dot priority-dot-${priorityClass}`} aria-hidden="true" />
-                    )}
-                    {item.title}
-                    <button
-                      type="button"
-                      className="organizer-item-edit"
-                      onClick={() => onEditItem(item)}
-                      aria-label={`Edit "${item.title}"`}
-                    >
-                      <EditIcon />
-                    </button>
-                  </span>
-                  {itemDate(item) && (
-                    <span className="organizer-item-date">
-                      {format(new Date(itemDate(item)), 'MMM d, h:mm a')}
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className="organizer-item-delete"
-                  onClick={() => handleDelete(item)}
-                  aria-label={`Delete "${item.title}"`}
+        {groups.map(({ type, label, items }) => (
+          <section key={type} className="organizer-group">
+            <h3>
+              {label} <span className="organizer-group-count">{items.length}</span>
+            </h3>
+            <ul className="organizer-item-list">
+              {items.map((item) => {
+                const priorityClass = (item.priority || 'none').replace(' ', '-');
+                return (
+                <li
+                  key={item.id}
+                  className={`organizer-item type-${item.itemType} priority-${priorityClass} ${item.status === 'completed' ? 'is-completed' : ''
+                    } ${isEnded(item) ? 'is-ended' : ''}`}
                 >
-                  ×
-                </button>
-              </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
+                  {item.itemType === 'task' && (
+                    <input
+                      type="checkbox"
+                      checked={item.status === 'completed'}
+                      onChange={() => toggleComplete(item)}
+                      aria-label={`Mark "${item.title}" as ${item.status === 'completed' ? 'not done' : 'done'
+                        }`}
+                    />
+                  )}
+                  <div className="organizer-item-body">
+                    <span className="organizer-item-title">
+                      {priorityClass !== 'none' && (
+                        <span className={`priority-dot priority-dot-${priorityClass}`} aria-hidden="true" />
+                      )}
+                      <span className="organizer-item-title-text">{item.title}</span>
+                      <button
+                        type="button"
+                        className="organizer-item-edit"
+                        onClick={() => onEditItem(item)}
+                        aria-label={`Edit "${item.title}"`}
+                      >
+                        <EditIcon />
+                      </button>
+                    </span>
+                    {itemDate(item) && (
+                      <span className="organizer-item-date">
+                        {format(new Date(itemDate(item)), 'MMM d, h:mm a')}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="organizer-item-delete"
+                    onClick={() => handleDelete(item)}
+                    aria-label={`Delete "${item.title}"`}
+                  >
+                    ×
+                  </button>
+                </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
     </aside>
   );
 }

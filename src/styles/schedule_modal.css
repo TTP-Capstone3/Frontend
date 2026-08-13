@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgb(0 0 0 / 0.5);
+  background: rgba(0, 0, 0, 0.162);
 }
 
 .modal-card {
@@ -15,7 +15,7 @@
   overflow-y: auto;
   border-radius: 8px;
   padding: 20px;
-  background: #1f2028;
+  background: #252426;
 }
 
 .modal-header {

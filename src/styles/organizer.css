@@ -17,27 +17,25 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* Match the calendar's month-view size so the row doesn't grow to fit a
+     long item list — the body below scrolls internally instead. */
+  height: 80vh;
+  min-height: 500px;
+  box-sizing: border-box;
 }
 
-.organizer-form {
+@media (max-width: 480px) {
+  .organizer-panel {
+    min-height: 420px;
+  }
+}
+
+.organizer-body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.organizer-form-row {
-  display: flex;
-  gap: 8px;
-}
-
-.organizer-form-row>* {
-  flex: 1;
-  min-width: 0;
-}
-
-.organizer-date-field {
-  display: flex;
-  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .organizer-item-list {
@@ -99,6 +97,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+}
+
+/* Truncates long titles with an ellipsis instead of letting them run under
+   the edit/delete buttons. */
+.organizer-item-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 /* Small pencil button sitting right next to the title. */
@@ -119,6 +127,11 @@
 .organizer-item-edit:hover,
 .organizer-item-edit:focus-visible {
   opacity: 1;
+}
+
+/* Keeps the delete button a fixed size so it can't be squeezed by a long title. */
+.organizer-item-delete {
+  flex: 0 0 auto;
 }
 
 /* Priority dot shown to the left of the item title. */

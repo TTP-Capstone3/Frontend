@@ -6,14 +6,25 @@
     padding: 16px;
     border: 1px solid var(--border);
     border-radius: 8px;
+    background: rgba(106, 106, 106, 0.097);
+    height: 80vh;
+    min-height: 500px;
+}
+
+@media (max-width: 480px) {
+    .chat-bar {
+        min-height: 420px;
+    }
 }
 
 .chat-messages {
     flex: 1;
     min-height: 200px;
+    overflow-y: auto;
 }
 
 .chat-compose {
     display: flex;
     gap: 8px;
+    flex: 0 0 auto;
 }
