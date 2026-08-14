@@ -142,11 +142,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-.organizer-filter-menu {
-  position: relative;
-  flex: 0 0 auto;
-}
-
 .organizer-filter-popover {
   position: absolute;
   left: calc(100% + 8px);

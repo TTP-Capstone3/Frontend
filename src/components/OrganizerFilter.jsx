@@ -27,7 +27,7 @@ export default function OrganizerFilter({ filters, onSearchChange, onToggleFilte
         setIsOpen(false);
       }
     }
-
+    
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -51,13 +51,15 @@ export default function OrganizerFilter({ filters, onSearchChange, onToggleFilte
           className="organizer-filter-button"
           onClick={() => setIsOpen((current) => !current)}
           aria-expanded={isOpen}
+          aria-haspopup="dialog"
+          aria-controls="organizer-filter-popover"
         >
           Filter By:
         </button>
       </div>
 
       {isOpen && (
-        <div className="organizer-filter-popover">
+        <div className="organizer-filter-popover" >
         <fieldset className="organizer-filter-section">
             <legend>Type</legend>
 

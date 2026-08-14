@@ -2,7 +2,7 @@
 
 import format from 'date-fns/format';
 import { useSchedule } from '../context/ScheduleContext';
-import OrganizerFilter from "../components/OrganizerFilter"
+import OrganizerFilter from "./OrganizerFilter"
 import '../styles/organizer.css';
 
 // Group order and labels. A group with no items is hidden.
