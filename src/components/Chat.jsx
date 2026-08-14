@@ -1,5 +1,11 @@
 import { useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
+import { useSchedule } from '../context/ScheduleContext';
+import {
+  markProposalSaved,
+  removeProposal,
+} from '../utils/aiProposalMessages';
+import AiProposalPreview from './AiProposalPreview';
 import '../styles/chat.css';
 
 export default function Chat() {
@@ -7,7 +13,44 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [savingItem, setSavingItem] = useState(null);
+  const { addItem } = useSchedule();
   const isSending = useRef(false);
+  const isSaving = useRef(false);
+
+  function handleCancel(messageIndex, itemIndex) {
+    setMessages((currentMessages) =>
+      removeProposal(currentMessages, messageIndex, itemIndex),
+    );
+  }
+
+  async function handleConfirm(messageIndex, itemIndex, proposal) {
+    if (isSaving.current) {
+      return;
+    }
+
+    const itemKey = `${messageIndex}-${itemIndex}`;
+    isSaving.current = true;
+    setSavingItem(itemKey);
+    setError('');
+
+    try {
+      await addItem(proposal);
+
+      setMessages((currentMessages) =>
+        markProposalSaved(currentMessages, messageIndex, itemIndex),
+      );
+    } catch (saveError) {
+      const errorMessage =
+        saveError instanceof Error
+          ? saveError.message
+          : 'Could not save the proposal.';
+      setError(errorMessage);
+    } finally {
+      isSaving.current = false;
+      setSavingItem(null);
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -64,6 +107,18 @@ export default function Chat() {
             {chatMessage.items?.map((item, itemIndex) =>
               item.kind === 'clarification' && item.question ? (
                 <p key={`question-${itemIndex}`}>{item.question}</p>
+              ) : item.kind === 'proposal' && item.proposal ? (
+                <AiProposalPreview
+                  key={`proposal-${itemIndex}`}
+                  proposal={item.proposal}
+                  onConfirm={() =>
+                    handleConfirm(messageIndex, itemIndex, item.proposal)
+                  }
+                  onCancel={() => handleCancel(messageIndex, itemIndex)}
+                  isSaving={savingItem === `${messageIndex}-${itemIndex}`}
+                  isSaved={item.isSaved}
+                  actionsDisabled={savingItem !== null}
+                />
               ) : null,
             )}
           </div>
