@@ -19,7 +19,7 @@ export default function ProtectedPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null)
   const [activeTab, setActiveTab] = useState('calendar')
-  const [filters, setFilters] = useState({search: '', type: 'all', priority: 'all', status: 'all'});
+  const [filters, setFilters] = useState({search: '', types: [], priorities: []});
 
   const fileInputRef = useRef(null)
   const { scheduleItems, refreshItems } = useSchedule()
@@ -118,10 +118,9 @@ export default function ProtectedPage() {
   const filteredItems = scheduleItems.filter((item) => {
     const search = filters.search.trim().toLowerCase();
     const matchesSearch = !search || item.title?.toLowerCase().includes(search) || item.description?.toLowerCase().includes(search);
-    const matchesType = filters.type === 'all' || item.itemType === filters.type;
-    const matchesPriority = filters.priority === 'all' || (item.priority || 'none') === filters.priority;
-    const matchesStatus = filters.status === 'all' || (item.status || 'active') === filters.status;
-    return (matchesSearch && matchesType && matchesPriority && matchesStatus);
+    const matchesType = filters.types.length === 0 || filters.types.includes(item.itemType);
+    const matchesPriority = filters.priorities.length === 0 || filters.priorities.includes(item.priority || 'none');
+    return matchesSearch && matchesType && matchesPriority;
   });
 
   const icsToolbar = (

@@ -58,47 +58,51 @@ export default function OrganizerFilter({ filters, onSearchChange, onToggleFilte
 
       {isOpen && (
         <div className="organizer-filter-popover">
-          <fieldset className="organizer-filter-section">
+        <fieldset className="organizer-filter-section">
             <legend>Type</legend>
 
+            <div className="organizer-filter-options">
             {ITEM_TYPES.map((type) => (
-              <label key={type.value} className="organizer-filter-option">
+                <label key={type.value} className="organizer-filter-option">
                 <input
-                  type="checkbox"
-                  checked={filters.types.includes(type.value)}
-                  onChange={() => onToggleFilter('types', type.value)}
+                    type="checkbox"
+                    checked={filters.types.includes(type.value)}
+                    onChange={() => onToggleFilter('types', type.value)}
                 />
                 {type.label}
-              </label>
+                </label>
             ))}
-          </fieldset>
+            </div>
+        </fieldset>
 
-          <fieldset className="organizer-filter-section">
+        <fieldset className="organizer-filter-section">
             <legend>Priority</legend>
 
+            <div className="organizer-filter-options">
             {PRIORITIES.map((priority) => (
-              <label key={priority.value} className="organizer-filter-option">
+                <label key={priority.value} className="organizer-filter-option">
                 <input
-                  type="checkbox"
-                  checked={filters.priorities.includes(priority.value)}
-                  onChange={() =>
+                    type="checkbox"
+                    checked={filters.priorities.includes(priority.value)}
+                    onChange={() =>
                     onToggleFilter('priorities', priority.value)
-                  }
+                    }
                 />
                 {priority.label}
-              </label>
+                </label>
             ))}
-          </fieldset>
+            </div>
+        </fieldset>
 
-          <button
+        <button
             type="button"
             className="organizer-filter-clear"
             onClick={onClearFilters}
-          >
+        >
             Clear filters
-          </button>
+        </button>
         </div>
-      )}
+    )}
     </div>
   );
 }
