@@ -19,13 +19,33 @@ export default function ProtectedPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null)
   const [activeTab, setActiveTab] = useState('calendar')
+  const [filters, setFilters] = useState({search: '', type: 'all', priority: 'all', status: 'all'});
 
   const fileInputRef = useRef(null)
-  const { refreshItems } = useSchedule()
+  const { scheduleItems, refreshItems } = useSchedule()
 
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [icsMessage, setIcsMessage] = useState(null)
+
+  function handleSearchChange(value) {
+    setFilters((filters) => ({...filters, search: value}));
+  }
+
+  function handleToggleFilter(name, value) {
+    setFilters((filters) => {
+      const selected = filters[name];
+      const newValues = selected.includes(value)
+        ? selected.filter((selectedValue) => selectedValue !== value)
+        : [...selected, value];
+
+      return {...filters, [name]: newValues};
+    });
+  }
+
+  function clearFilters() {
+    setFilters({search: '', types: [], priorities: []});
+  }
 
   // Opens the schedule-item modal for adding a new schedule item.
   function openCreateModal() {
@@ -95,6 +115,15 @@ export default function ProtectedPage() {
     }
   }
 
+  const filteredItems = scheduleItems.filter((item) => {
+    const search = filters.search.trim().toLowerCase();
+    const matchesSearch = !search || item.title?.toLowerCase().includes(search) || item.description?.toLowerCase().includes(search);
+    const matchesType = filters.type === 'all' || item.itemType === filters.type;
+    const matchesPriority = filters.priority === 'all' || (item.priority || 'none') === filters.priority;
+    const matchesStatus = filters.status === 'all' || (item.status || 'active') === filters.status;
+    return (matchesSearch && matchesType && matchesPriority && matchesStatus);
+  });
+
   const icsToolbar = (
     <div className="ics-toolbar">
       {/* Import Button */}
@@ -137,12 +166,18 @@ export default function ProtectedPage() {
     <>
       <section className="protected-layout" data-active-tab={activeTab}>
         <Organizer
+          scheduleItems={filteredItems}
+          filters={filters}
+          onSearchChange={handleSearchChange}
+          onToggleFilter={handleToggleFilter}
+          onClearFilters={clearFilters}
           onAddItem={openCreateModal}
           onEditItem={openEditModal}
           toolbar={icsToolbar}
         />
 
         <MyCalendar
+          scheduleItems={filteredItems}
           onEditItem={openEditModal}
         />
 

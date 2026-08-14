@@ -1,8 +1,8 @@
 // Left panel — tasks, events, notes, grouped.
 
-import { useState } from 'react';
 import format from 'date-fns/format';
 import { useSchedule } from '../context/ScheduleContext';
+import OrganizerFilter from "../components/OrganizerFilter"
 import '../styles/organizer.css';
 
 // Group order and labels. A group with no items is hidden.
@@ -53,8 +53,8 @@ function EditIcon() {
   );
 }
 
-export default function Organizer({ onAddItem, onEditItem, toolbar }) {
-  const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } = useSchedule();
+export default function Organizer({ scheduleItems, filters, onSearchChange, onToggleFilter, onClearFilters, onAddItem, onEditItem, toolbar }) {
+  const { isLoading, error, updateItem, removeItem } = useSchedule();
 
   // The tasks have a checkbox the others dont
   async function toggleComplete(item) {
@@ -98,6 +98,13 @@ export default function Organizer({ onAddItem, onEditItem, toolbar }) {
         <button type="button" className="organizer-add-button" onClick={onAddItem}>
           + Add item
         </button>
+
+        <OrganizerFilter
+          filters={filters}
+          onSearchChange={onSearchChange}
+          onToggleFilter={onToggleFilter}
+          onClearFilters={onClearFilters}
+        />
       </div>
 
       <div className="organizer-body">
