@@ -134,6 +134,53 @@
   flex: 0 0 auto;
 }
 
+.organizer-filter-controls {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.organizer-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.organizer-search-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 4px 10px;
+  font-size: 0.85em;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(106, 106, 106, 0.097);
+  color: var(--text);
+}
+
+.organizer-search-input:focus {
+  outline: none;
+  border-color: var(--text-h);
+  box-shadow: 0 0 0 0.5px var(--text-h);
+}
+
+.organizer-filter-button {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  font-size: 0.85em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(106, 106, 106, 0.097);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.organizer-filter-button:hover {
+  color: var(--text-h);
+}
+
 /* Priority dot shown to the left of the item title. */
 .organizer-item .priority-dot {
   flex: 0 0 auto;

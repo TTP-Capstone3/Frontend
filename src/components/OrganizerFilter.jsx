@@ -52,7 +52,7 @@ export default function OrganizerFilter({ filters, onSearchChange, onToggleFilte
           onClick={() => setIsOpen((current) => !current)}
           aria-expanded={isOpen}
         >
-          Filter
+          Filter By:
         </button>
       </div>
 

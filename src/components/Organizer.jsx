@@ -99,13 +99,14 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
           + Add item
         </button>
 
-        <OrganizerFilter
-          filters={filters}
-          onSearchChange={onSearchChange}
-          onToggleFilter={onToggleFilter}
-          onClearFilters={onClearFilters}
-        />
       </div>
+
+      <OrganizerFilter
+        filters={filters}
+        onSearchChange={onSearchChange}
+        onToggleFilter={onToggleFilter}
+        onClearFilters={onClearFilters}
+      />
 
       <div className="organizer-body">
         {isLoading && <p className="organizer-status">Loading your schedule…</p>}
@@ -118,7 +119,7 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
 
         {!isLoading && !error && groups.length === 0 && (
           <p className="organizer-status">
-            Nothing here yet — add your first task, event, reminder, or note above.
+            No schedule items to display.
           </p>
         )}
 
