@@ -28,3 +28,17 @@
     gap: 8px;
     flex: 0 0 auto;
 }
+
+.chat-compose input {
+    /* Lets the input shrink instead of pushing the Send button out. */
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-compose button {
+    flex: 0 0 auto;
+    border: none;
+    background: none;
+    color: var(--accent);
+    cursor: pointer;
+}

@@ -35,10 +35,12 @@ function EventWithPriority({ event }) {
     );
 }
 
-// Colors each event block by its item type (event/task/reminder/note).
+// Colors each event block by type, and dims events that have already ended.
 function eventPropGetter(event) {
     const itemType = event.scheduleItem?.itemType || 'event';
-    return { className: `rbc-event-type-${itemType}` };
+    const isPast = event.end < new Date();
+    const className = `rbc-event-type-${itemType}${isPast ? ' rbc-event-past' : ''}`;
+    return { className };
 }
 
 export default function MyCalendar({ onEditItem }) {

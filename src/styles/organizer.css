@@ -13,6 +13,13 @@
   margin: 0;
 }
 
+.organizer-add-button {
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
 .organizer-panel {
   display: flex;
   flex-direction: column;
@@ -36,6 +43,18 @@
   gap: 8px;
   min-height: 0;
   overflow-y: auto;
+  /* Keeps the scrollbar from overlapping each item's delete (×) button. */
+  padding-right: 10px;
+}
+
+/* Loading/empty copy reads as secondary text; the error variant borrows the calendar's warning red. */
+.organizer-status {
+  opacity: 0.7;
+}
+
+.organizer-status-error {
+  opacity: 1;
+  color: #f87171;
 }
 
 .organizer-item-list {
@@ -79,10 +98,15 @@
 
 }
 
-/* Struck through once a task is checked off or an event has ended. */
+/* Dimmed once a task is checked off or an event has ended. */
 .organizer-item.is-completed .organizer-item-title,
 .organizer-item.is-ended .organizer-item-title {
-  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* De-emphasize the count next to a group label so it reads as a badge, not part of the heading. */
+.organizer-group-count {
+  font-weight: 400;
   opacity: 0.6;
 }
 
@@ -160,4 +184,67 @@
 
 .priority-dot-very-high {
   background: #f87171;
+}
+
+/* Finished group — collapsed by default via <details>, click the summary to expand. */
+.organizer-group-finished summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.organizer-group-finished summary::-webkit-details-marker {
+  display: none;
+}
+
+.organizer-group-finished summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 4px;
+  transition: transform 0.15s ease;
+}
+
+.organizer-group-finished[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.organizer-group-finished>.organizer-item-list {
+  margin-top: 8px;
+}
+
+.organizer-group-finished .organizer-item {
+  opacity: 0.6;
+}
+
+/* Per-type dropdowns nested inside the Finished group. */
+.organizer-group-finished-sub {
+  margin-top: 8px;
+  margin-left: 16px;
+}
+
+.organizer-group-finished-sub summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.organizer-group-finished-sub summary::-webkit-details-marker {
+  display: none;
+}
+
+.organizer-group-finished-sub summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 4px;
+  transition: transform 0.15s ease;
+}
+
+.organizer-group-finished-sub[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.organizer-group-finished-sub .organizer-item-list {
+  margin-top: 8px;
 }

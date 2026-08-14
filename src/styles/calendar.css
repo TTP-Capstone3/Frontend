@@ -28,6 +28,17 @@
   padding: 0.15rem 0.5rem;
   font-size: 14px;
   color: var(--text);
+  border-color: var(--border);
+}
+
+/* Override react-big-calendar's hardcoded button colors so they stay legible in dark mode. */
+.calendar-panel .rbc-toolbar button:hover,
+.calendar-panel .rbc-toolbar button:focus,
+.calendar-panel .rbc-toolbar button:active,
+.calendar-panel .rbc-toolbar button.rbc-active {
+  color: var(--text-h);
+  background-color: var(--border);
+  border-color: var(--border);
 }
 
 /* the current month/period label. */
@@ -99,18 +110,6 @@
   padding: 0 1px 1px;
 }
 
-/* Clearly marks the current time in week and day views. */
-/* react-big-calendar hardcodes each time-grid row (rbc-timeslot-group) to a
-   40px floor, which is taller than 24 hourly rows can fit in the panel on
-   most screens, forcing an inner scrollbar in week/day view. The rows are
-   already flex-grow children of a column that fills the available height
-   (rbc-time-column { min-height: 100% }), so dropping the floor lets them
-   shrink just enough to fill the panel exactly — however little that is on
-   a given screen — instead of us guessing a fixed pixel value. */
-.calendar-panel .rbc-timeslot-group {
-  min-height: 1px;
-}
-
 /* The hour labels' inherited line-height (from the app's base text styles)
    is taller than a single shrunk row, so it — not the 40px floor above —
    ends up the real limit on how far the rows can shrink. Tightening it here
@@ -158,7 +157,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid #2563eb;
+  border: 2px solid var(--accent);
   font-weight: 600;
 }
 
@@ -185,6 +184,11 @@
   background-color: #dda7e3;
   border-color: #c47dd1;
   color: #1f2028;
+}
+
+/* Events that have already ended stay visible but fade into the background. */
+.calendar-panel .rbc-event.rbc-event-past {
+  opacity: 0.25;
 }
 
 /* Priority dot shown to the left of an event's title. */

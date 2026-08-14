@@ -3,17 +3,18 @@
 :root {
   --text: #6b6375;
   --text-h: #08060d;
+  --box: rgb(103, 103, 103);
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #0074ca;
+  --accent-bg: rgba(0, 116, 202, 0.1);
+  --accent-border: rgba(0, 116, 202, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: 'Bricolage Grotesque', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: 'Bricolage Grotesque', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Manrope', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Manrope', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -35,12 +36,13 @@
   :root {
     --text: #9ca3af;
     --text-h: #f3f4f6;
+    --box: rgb(133, 132, 132);
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
+    --accent: #60aaf3;
+    --accent-bg: rgba(96, 170, 243, 0.15);
+    --accent-border: rgba(96, 170, 243, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
@@ -50,12 +52,13 @@
 :root[data-theme='dark'] {
   --text: #d8dce4;
   --text-h: #f3f4f6;
+  --box: rgb(133, 132, 132);
   --bg: #16171d;
   --border: #2e303a;
   --code-bg: #1f2028;
-  --accent: #c084fc;
-  --accent-bg: rgba(192, 132, 252, 0.15);
-  --accent-border: rgba(192, 132, 252, 0.5);
+  --accent: #60aaf3;
+  --accent-bg: rgba(96, 170, 243, 0.15);
+  --accent-border: rgba(96, 170, 243, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 }
@@ -64,12 +67,13 @@
 :root[data-theme='light'] {
   --text: #6b6375;
   --text-h: #08060d;
+  --box: rgb(103, 103, 103);
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #0074ca;
+  --accent-bg: rgba(0, 116, 202, 0.1);
+  --accent-border: rgba(0, 116, 202, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 }
@@ -79,9 +83,7 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
   text-align: center;
   min-height: 100svh;
   display: flex;
@@ -89,13 +91,9 @@ body {
   box-sizing: border-box;
 }
 
-#root:has(.protected-layout) {
-  width: 100%;
-  max-width: none;
-}
-
 h1,
-h2 {
+h2,
+h3 {
   font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);

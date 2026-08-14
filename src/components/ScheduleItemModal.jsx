@@ -32,7 +32,7 @@ const ITEM_TYPES = [
 function toIso(value) {
   return value ? new Date(value).toISOString() : undefined
 }
-function PriorityDropdown({ value, onChange }) {
+function PriorityDropdown({ value, onChange, labelledBy }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const selected = PRIORITIES.find((option) => option.value === value) || PRIORITIES[0];
@@ -48,13 +48,14 @@ function PriorityDropdown({ value, onChange }) {
   }, []);
 
   return (
-    <div className="priority-dropdown" ref={containerRef}>
+    <div className="field-dropdown" ref={containerRef}>
       <button
         type="button"
-        className="priority-dropdown-trigger"
+        className="field-dropdown-trigger"
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-labelledby={labelledBy}
       >
         {PRIORITY_DOT_COLORS[selected.value] && (
           <span
@@ -67,13 +68,13 @@ function PriorityDropdown({ value, onChange }) {
       </button>
 
       {open && (
-        <ul className="priority-dropdown-menu" role="listbox">
+        <ul className="field-dropdown-menu" role="listbox">
           {PRIORITIES.map((option) => (
             <li
               key={option.value}
               role="option"
               aria-selected={option.value === value}
-              className="priority-dropdown-option"
+              className="field-dropdown-option"
               onClick={() => {
                 onChange(option.value);
                 setOpen(false);
@@ -86,6 +87,57 @@ function PriorityDropdown({ value, onChange }) {
                   aria-hidden="true"
                 />
               )}
+              <span>{option.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// Same as PriorityDropdown but with no color dots — used for the Type field.
+function TypeDropdown({ value, onChange, labelledBy }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+  const selected = ITEM_TYPES.find((option) => option.value === value) || ITEM_TYPES[0];
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="field-dropdown" ref={containerRef}>
+      <button
+        type="button"
+        className="field-dropdown-trigger"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby={labelledBy}
+      >
+        <span>{selected.label}</span>
+      </button>
+
+      {open && (
+        <ul className="field-dropdown-menu" role="listbox">
+          {ITEM_TYPES.map((option) => (
+            <li
+              key={option.value}
+              role="option"
+              aria-selected={option.value === value}
+              className="field-dropdown-option"
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+              }}
+            >
               <span>{option.label}</span>
             </li>
           ))}
@@ -243,26 +295,29 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
         {/* Type + priority */}
         <div className="schedule-item-form-row">
-          <label className="schedule-item-field"> Type
+          {/* Not a native <label>, since that would re-toggle these dropdowns on click. */}
+          <div className="schedule-item-field">
+            <span id="type-field-label">Type</span>
 
-            <select
+            <TypeDropdown
               value={itemType}
-              onChange={(event) => {
-                setItemType(event.target.value);
+              onChange={(nextType) => {
+                setItemType(nextType);
                 setFormError(null);
               }}
-            >
-              {ITEM_TYPES.map((type) => (
-                <option key={type.value} value={type.value}> {type.label} </option>
-              ))}
-            </select>
-          </label>
+              labelledBy="type-field-label"
+            />
+          </div>
 
-          <label className="schedule-item-field">
-            Priority
+          <div className="schedule-item-field">
+            <span id="priority-field-label">Priority</span>
 
-            <PriorityDropdown value={priority} onChange={setPriority} />
-          </label>
+            <PriorityDropdown
+              value={priority}
+              onChange={setPriority}
+              labelledBy="priority-field-label"
+            />
+          </div>
         </div>
 
         {/* Conditional fields start here */}
@@ -274,6 +329,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
               <input
                 type="datetime-local"
+                className={dueAt ? '' : 'is-empty'}
                 value={dueAt}
                 onChange={(event) => setDueAt(event.target.value)}
               />
@@ -303,6 +359,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
                 <input
                   type="datetime-local"
+                  className={startAt ? '' : 'is-empty'}
                   value={startAt}
                   onChange={(event) => setStartAt(event.target.value)}
                 />
@@ -312,6 +369,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
                 <input
                   type="datetime-local"
+                  className={endAt ? '' : 'is-empty'}
                   value={endAt}
                   onChange={(event) => setEndAt(event.target.value)}
                 />
@@ -336,6 +394,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
 
             <input
               type="datetime-local"
+              className={reminderAt ? '' : 'is-empty'}
               value={reminderAt}
               onChange={(event) => setReminderAt(event.target.value)}
             />
