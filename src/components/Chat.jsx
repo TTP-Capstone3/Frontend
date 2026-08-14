@@ -5,6 +5,10 @@ import {
   markProposalSaved,
   removeProposal,
 } from '../utils/aiProposalMessages';
+import {
+  combineClarificationRequest,
+  hasClarification,
+} from '../utils/aiClarification';
 import AiProposalPreview from './AiProposalPreview';
 import '../styles/chat.css';
 
@@ -14,6 +18,7 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [savingItem, setSavingItem] = useState(null);
+  const [pendingRequest, setPendingRequest] = useState('');
   const { addItem } = useSchedule();
   const isSending = useRef(false);
   const isSaving = useRef(false);
@@ -22,6 +27,7 @@ export default function Chat() {
     setMessages((currentMessages) =>
       removeProposal(currentMessages, messageIndex, itemIndex),
     );
+    setPendingRequest('');
   }
 
   async function handleConfirm(messageIndex, itemIndex, proposal) {
@@ -40,6 +46,7 @@ export default function Chat() {
       setMessages((currentMessages) =>
         markProposalSaved(currentMessages, messageIndex, itemIndex),
       );
+      setPendingRequest('');
     } catch (saveError) {
       const errorMessage =
         saveError instanceof Error
@@ -60,6 +67,20 @@ export default function Chat() {
       return;
     }
 
+    let requestMessage = cleanedMessage;
+
+    try {
+      if (pendingRequest) {
+        requestMessage = combineClarificationRequest(
+          pendingRequest,
+          cleanedMessage,
+        );
+      }
+    } catch (clarificationError) {
+      setError(clarificationError.message);
+      return;
+    }
+
     // Stops quick double clicks from sending the same message twice.
     isSending.current = true;
     setIsLoading(true);
@@ -73,7 +94,13 @@ export default function Chat() {
     try {
       const timeZone =
         Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-      const result = await requestScheduleProposal(cleanedMessage, timeZone);
+      const result = await requestScheduleProposal(requestMessage, timeZone);
+
+      if (hasClarification(result.items)) {
+        setPendingRequest(requestMessage);
+      } else {
+        setPendingRequest('');
+      }
 
       setMessages((currentMessages) => [
         ...currentMessages,

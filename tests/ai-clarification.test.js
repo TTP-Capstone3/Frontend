@@ -19,6 +19,22 @@ test('combines the original request with a follow-up answer', () => {
   );
 });
 
+test('keeps earlier answers when another clarification is needed', () => {
+  const firstFollowUp = combineClarificationRequest(
+    'Add a meeting tomorrow',
+    '3 PM to 4 PM',
+  );
+  const secondFollowUp = combineClarificationRequest(
+    firstFollowUp,
+    'Use the conference room',
+  );
+
+  assert.equal(
+    secondFollowUp,
+    'Add a meeting tomorrow\nAdditional details: 3 PM to 4 PM\nAdditional details: Use the conference room',
+  );
+});
+
 test('recognizes a clarification in an AI response', () => {
   const items = [
     { kind: 'proposal' },
