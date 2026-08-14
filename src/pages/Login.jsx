@@ -91,7 +91,7 @@ function Login({ setUser }) {
       <div className='rounded-xl border border-(--border) p-6 shadow-(--shadow) sm:p-8'>
         <h1 className='mb-1 text-3xl font-semibold text-(--text-h)'>Log in</h1>
         <p className='mb-6 text-sm'>
-          Welcome back — pick up where you left off.
+          If you've already created an account — Log in.
         </p>
 
         {errors.general && (
@@ -113,7 +113,7 @@ function Login({ setUser }) {
           <FormField
             label='Email or username'
             name='identifier'
-            placeholder='you@example.com'
+            placeholder='name@example.com'
             autoComplete='username'
             value={formData.identifier}
             onChange={handleChange}

@@ -107,7 +107,7 @@ function Signup({ setUser }) {
     <section className='mx-auto w-full max-w-md'>
       <div className='rounded-xl border border-(--border) p-6 shadow-(--shadow) sm:p-8'>
         <h1 className='mb-1 text-3xl font-semibold text-(--text-h)'>Sign up</h1>
-        <p className='mb-6 text-sm'>Create an account to start adding tasks.</p>
+        <p className='mb-6 text-sm'>Create an account to begin using the app.</p>
 
         {errors.general && (
           <p
@@ -128,7 +128,7 @@ function Signup({ setUser }) {
           <FormField
             label='Username'
             name='username'
-            placeholder='ada_lovelace'
+            placeholder='Enter a username'
             autoComplete='username'
             value={formData.username}
             onChange={handleChange}
@@ -139,7 +139,7 @@ function Signup({ setUser }) {
             label='Email'
             name='email'
             type='email'
-            placeholder='you@example.com'
+            placeholder='name@example.com'
             autoComplete='email'
             value={formData.email}
             onChange={handleChange}
@@ -150,7 +150,7 @@ function Signup({ setUser }) {
             label='Password'
             name='password'
             type='password'
-            placeholder='••••••••'
+            placeholder='At least 6 characters'
             // Tells a password manager to offer a GENERATED password here
             // rather than autofilling an existing one.
             autoComplete='new-password'
