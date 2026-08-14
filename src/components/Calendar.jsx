@@ -41,10 +41,10 @@ function eventPropGetter(event) {
     return { className: `rbc-event-type-${itemType}` };
 }
 
-export default function MyCalendar({ onEditItem }) {
+export default function MyCalendar({ scheduleItems = [], onEditItem }) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
-    const { scheduleItems, updateItem, removeItem } = useSchedule();
+    const { updateItem, removeItem } = useSchedule();
 
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedOccurrence, setSelectedOccurrence] = useState(null);
@@ -70,6 +70,15 @@ export default function MyCalendar({ onEditItem }) {
             console.error('Could not delete item:', err.message);
         }
     }
+
+    // When the selected item is no longer in scheduleItems close the popover.
+    useEffect(() => {
+        if (selectedItem && !scheduleItems.some((item) => item.id === selectedItem.id)) {
+            setSelectedItem(null);
+            setSelectedOccurrence(null);
+            setPopoverPosition(null);
+        }
+    }, [scheduleItems, selectedItem]);
 
     // This function deselects schedule-items & popover when the mouse clicked anywhere else.
     useEffect(() => {

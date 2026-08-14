@@ -134,6 +134,112 @@
   flex: 0 0 auto;
 }
 
+.organizer-filter-controls {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.organizer-filter-popover {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 0;
+  z-index: 100;
+  width: 250px;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.organizer-filter-section {
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+}
+
+.organizer-filter-section legend {
+  margin-bottom: 6px;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.organizer-filter-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 10px;
+}
+
+.organizer-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  font-size: 0.85em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.organizer-filter-clear {
+  width: 100%;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(106, 106, 106, 0.097);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.organizer-filter-clear:hover {
+  color: var(--text-h);
+}
+
+.organizer-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.organizer-search-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 4px 10px;
+  font-size: 0.85em;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(106, 106, 106, 0.097);
+  color: var(--text);
+}
+
+.organizer-search-input:focus {
+  outline: none;
+  border-color: var(--text-h);
+}
+
+.organizer-filter-button {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  font-size: 0.85em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(106, 106, 106, 0.097);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.organizer-filter-button:hover {
+  color: var(--text-h);
+}
+
 /* Priority dot shown to the left of the item title. */
 .organizer-item .priority-dot {
   flex: 0 0 auto;

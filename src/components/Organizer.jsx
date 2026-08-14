@@ -1,8 +1,8 @@
 // Left panel — tasks, events, notes, grouped.
 
-import { useState } from 'react';
 import format from 'date-fns/format';
 import { useSchedule } from '../context/ScheduleContext';
+import OrganizerFilter from "./OrganizerFilter"
 import '../styles/organizer.css';
 
 // Group order and labels. A group with no items is hidden.
@@ -53,8 +53,8 @@ function EditIcon() {
   );
 }
 
-export default function Organizer({ onAddItem, onEditItem, toolbar }) {
-  const { scheduleItems, isLoading, error, addItem, updateItem, removeItem } = useSchedule();
+export default function Organizer({ scheduleItems, filters, onSearchChange, onToggleFilter, onClearFilters, onAddItem, onEditItem, toolbar }) {
+  const { isLoading, error, updateItem, removeItem } = useSchedule();
 
   // The tasks have a checkbox the others dont
   async function toggleComplete(item) {
@@ -98,7 +98,15 @@ export default function Organizer({ onAddItem, onEditItem, toolbar }) {
         <button type="button" className="organizer-add-button" onClick={onAddItem}>
           + Add item
         </button>
+
       </div>
+
+      <OrganizerFilter
+        filters={filters}
+        onSearchChange={onSearchChange}
+        onToggleFilter={onToggleFilter}
+        onClearFilters={onClearFilters}
+      />
 
       <div className="organizer-body">
         {isLoading && <p className="organizer-status">Loading your schedule…</p>}
@@ -111,7 +119,7 @@ export default function Organizer({ onAddItem, onEditItem, toolbar }) {
 
         {!isLoading && !error && groups.length === 0 && (
           <p className="organizer-status">
-            Nothing here yet — add your first task, event, reminder, or note above.
+            No schedule items to display.
           </p>
         )}
 
