@@ -25,13 +25,19 @@ function isEnded(item) {
   return Boolean(end) && new Date(end) < new Date();
 }
 
-// Keep items dated today or later; items with no date are kept (can't judge them).
+// Keep items dated today or later (events use isEnded); undated items are kept.
 function isTodayOrFuture(item) {
+  if (item.itemType === 'event') return !isEnded(item);
   const date = itemDate(item);
   if (!date) return true;
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   return new Date(date) >= startOfToday;
+}
+
+// Finished is just the inverse of active.
+function isFinished(item) {
+  return !isTodayOrFuture(item);
 }
 
 // A small pencil icon for the edit button — sized/colored via CSS (currentColor).
@@ -88,6 +94,69 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
       .sort((a, b) => new Date(itemDate(a)) - new Date(itemDate(b))),
   })).filter((group) => group.items.length > 0);
 
+  // All past items, regardless of type, grouped together and most-recent-first.
+  const finishedItems = scheduleItems
+    .filter(isFinished)
+    .sort((a, b) => new Date(itemDate(b)) - new Date(itemDate(a)));
+
+  // Same past items, but split into per-type dropdowns (same order/labels as the active groups).
+  const finishedGroups = GROUPS.map(({ type, label }) => ({
+    type,
+    label,
+    items: finishedItems.filter((item) => item.itemType === type),
+  })).filter((group) => group.items.length > 0);
+
+  // Shared row markup so the type groups and the finished group render identically.
+  function renderItem(item) {
+    const priorityClass = (item.priority || 'none').replace(' ', '-');
+    return (
+      <li
+        key={item.id}
+        className={`organizer-item type-${item.itemType} priority-${priorityClass} ${item.status === 'completed' ? 'is-completed' : ''
+          } ${isEnded(item) ? 'is-ended' : ''}`}
+      >
+        {item.itemType === 'task' && (
+          <input
+            type="checkbox"
+            checked={item.status === 'completed'}
+            onChange={() => toggleComplete(item)}
+            aria-label={`Mark "${item.title}" as ${item.status === 'completed' ? 'not done' : 'done'
+              }`}
+          />
+        )}
+        <div className="organizer-item-body">
+          <span className="organizer-item-title">
+            {priorityClass !== 'none' && (
+              <span className={`priority-dot priority-dot-${priorityClass}`} aria-hidden="true" />
+            )}
+            <span className="organizer-item-title-text">{item.title}</span>
+            <button
+              type="button"
+              className="organizer-item-edit"
+              onClick={() => onEditItem(item)}
+              aria-label={`Edit "${item.title}"`}
+            >
+              <EditIcon />
+            </button>
+          </span>
+          {itemDate(item) && (
+            <span className="organizer-item-date">
+              {format(new Date(itemDate(item)), 'MMM d, h:mm a')}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          className="organizer-item-delete"
+          onClick={() => handleDelete(item)}
+          aria-label={`Delete "${item.title}"`}
+        >
+          ×
+        </button>
+      </li>
+    );
+  }
+
   return (
     <aside className="organizer-panel">
       {toolbar}
@@ -117,7 +186,7 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
           </p>
         )}
 
-        {!isLoading && !error && groups.length === 0 && (
+        {!isLoading && !error && groups.length === 0 && finishedItems.length === 0 && (
           <p className="organizer-status">
             No schedule items to display.
           </p>
@@ -129,58 +198,28 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
               {label} <span className="organizer-group-count">{items.length}</span>
             </h3>
             <ul className="organizer-item-list">
-              {items.map((item) => {
-                const priorityClass = (item.priority || 'none').replace(' ', '-');
-                return (
-                <li
-                  key={item.id}
-                  className={`organizer-item type-${item.itemType} priority-${priorityClass} ${item.status === 'completed' ? 'is-completed' : ''
-                    } ${isEnded(item) ? 'is-ended' : ''}`}
-                >
-                  {item.itemType === 'task' && (
-                    <input
-                      type="checkbox"
-                      checked={item.status === 'completed'}
-                      onChange={() => toggleComplete(item)}
-                      aria-label={`Mark "${item.title}" as ${item.status === 'completed' ? 'not done' : 'done'
-                        }`}
-                    />
-                  )}
-                  <div className="organizer-item-body">
-                    <span className="organizer-item-title">
-                      {priorityClass !== 'none' && (
-                        <span className={`priority-dot priority-dot-${priorityClass}`} aria-hidden="true" />
-                      )}
-                      <span className="organizer-item-title-text">{item.title}</span>
-                      <button
-                        type="button"
-                        className="organizer-item-edit"
-                        onClick={() => onEditItem(item)}
-                        aria-label={`Edit "${item.title}"`}
-                      >
-                        <EditIcon />
-                      </button>
-                    </span>
-                    {itemDate(item) && (
-                      <span className="organizer-item-date">
-                        {format(new Date(itemDate(item)), 'MMM d, h:mm a')}
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className="organizer-item-delete"
-                    onClick={() => handleDelete(item)}
-                    aria-label={`Delete "${item.title}"`}
-                  >
-                    ×
-                  </button>
-                </li>
-                );
-              })}
+              {items.map(renderItem)}
             </ul>
           </section>
         ))}
+
+        {finishedGroups.length > 0 && (
+          <details className="organizer-group organizer-group-finished">
+            <summary>
+              Archived <span className="organizer-group-count">{finishedItems.length}</span>
+            </summary>
+            {finishedGroups.map(({ type, label, items }) => (
+              <details key={type} className="organizer-group organizer-group-finished-sub">
+                <summary>
+                  {label} <span className="organizer-group-count">{items.length}</span>
+                </summary>
+                <ul className="organizer-item-list">
+                  {items.map(renderItem)}
+                </ul>
+              </details>
+            ))}
+          </details>
+        )}
       </div>
     </aside>
   );

@@ -10,12 +10,15 @@
 }
 
 .modal-card {
-  width: min(520px, calc(100% - 32px));
+  width: min(600px, calc(100% - 32px));
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 8px;
   padding: 20px;
-  background: #252426;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .modal-header {
@@ -54,6 +57,11 @@
   resize: vertical;
 }
 
+/* Dims the mm/dd/yyyy placeholder text on datetime-local inputs that have no value set. */
+.schedule-item-field input.is-empty {
+  color: color-mix(in srgb, currentColor 50%, transparent);
+}
+
 .schedule-item-form-row {
   display: flex;
   gap: 10px;
@@ -74,11 +82,11 @@
   }
 }
 
-.priority-dropdown {
+.field-dropdown {
   position: relative;
 }
 
-.priority-dropdown-trigger {
+.field-dropdown-trigger {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -94,7 +102,7 @@
   cursor: pointer;
 }
 
-.priority-dropdown-menu {
+.field-dropdown-menu {
   position: absolute;
   z-index: 10;
   top: calc(100% + 4px);
@@ -107,10 +115,10 @@
   overflow-y: auto;
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
-  background: #1f2028;
+  background: var(--bg);
 }
 
-.priority-dropdown-option {
+.field-dropdown-option {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -119,12 +127,12 @@
   cursor: pointer;
 }
 
-.priority-dropdown-option:hover,
-.priority-dropdown-option[aria-selected='true'] {
-  background: rgba(255, 255, 255, 0.08);
+.field-dropdown-option:hover,
+.field-dropdown-option[aria-selected='true'] {
+  background: color-mix(in srgb, currentColor 10%, transparent);
 }
 
-.priority-dropdown .priority-dot {
+.priority-dot {
   flex: 0 0 auto;
   width: 8px;
   height: 8px;
