@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   combineClarificationRequest,
+  getAiResponseText,
   hasClarification,
   MAX_AI_MESSAGE_LENGTH,
 } from '../src/utils/aiClarification.js';
@@ -44,6 +45,22 @@ test('recognizes a clarification in an AI response', () => {
   assert.equal(hasClarification(items), true);
   assert.equal(hasClarification([{ kind: 'proposal' }]), false);
   assert.equal(hasClarification(null), false);
+});
+
+test('does not repeat the AI reply when a clarification is shown', () => {
+  const items = [
+    { kind: 'clarification', question: 'What time is the meeting?' },
+  ];
+
+  assert.equal(getAiResponseText(items), '');
+});
+
+test('uses a short message for schedule proposals', () => {
+  assert.equal(getAiResponseText([{ kind: 'proposal' }]), 'Review this item:');
+  assert.equal(
+    getAiResponseText([{ kind: 'proposal' }, { kind: 'proposal' }]),
+    'Review these 2 items:',
+  );
 });
 
 test('requires both parts of a clarification request', () => {

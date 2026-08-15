@@ -7,6 +7,7 @@ import {
 } from '../utils/aiProposalMessages';
 import {
   combineClarificationRequest,
+  getAiResponseText,
   hasClarification,
 } from '../utils/aiClarification';
 import AiProposalPreview from './AiProposalPreview';
@@ -106,7 +107,7 @@ export default function Chat() {
         ...currentMessages,
         {
           sender: 'ai',
-          text: result.reply,
+          text: getAiResponseText(result.items),
           items: result.items,
         },
       ]);
@@ -129,7 +130,7 @@ export default function Chat() {
             key={`${chatMessage.sender}-${messageIndex}`}
           >
             <strong>{chatMessage.sender === 'user' ? 'You' : 'AI'}</strong>
-            <p>{chatMessage.text}</p>
+            {chatMessage.text && <p>{chatMessage.text}</p>}
 
             {chatMessage.items?.map((item, itemIndex) =>
               item.kind === 'clarification' && item.question ? (

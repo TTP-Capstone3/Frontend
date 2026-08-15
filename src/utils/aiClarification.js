@@ -7,6 +7,27 @@ export function hasClarification(items) {
   );
 }
 
+export function getAiResponseText(items) {
+  // The question already contains the details the user needs.
+  if (hasClarification(items)) {
+    return '';
+  }
+
+  const proposalCount = Array.isArray(items)
+    ? items.filter((item) => item?.kind === 'proposal').length
+    : 0;
+
+  if (proposalCount === 1) {
+    return 'Review this item:';
+  }
+
+  if (proposalCount > 1) {
+    return `Review these ${proposalCount} items:`;
+  }
+
+  return '';
+}
+
 export function combineClarificationRequest(originalRequest, answer) {
   const cleanedRequest = originalRequest?.trim();
   const cleanedAnswer = answer?.trim();
