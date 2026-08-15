@@ -42,3 +42,7 @@
     color: var(--accent);
     cursor: pointer;
 }
+
+.chat-compose button.is-listening {
+    color: #f87171;
+}

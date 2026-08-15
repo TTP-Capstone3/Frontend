@@ -13,6 +13,10 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  //start voice input set mic to rest state - Daniel - this state is when the mic is not on and not recieving Audio.
+  const [isListening, setIsListening] = useState(false);
+  //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
+  const recognitionRef = useRef(null);
   const [savingItem, setSavingItem] = useState(null);
   const { addItem } = useSchedule();
   const isSending = useRef(false);
@@ -22,6 +26,45 @@ export default function Chat() {
     setMessages((currentMessages) =>
       removeProposal(currentMessages, messageIndex, itemIndex),
     );
+  }
+  // this function will turn the mic on and off.
+  function toggleListening() {
+    // this is the browser-compatibility check for Chrome/Safari
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setError('Voice input is not supported in this browser.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+
+    // fires once the browser finishes transcribing what you said
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setMessage((currentMessage) => `${currentMessage} ${transcript}`.trim());
+    };
+
+    // fires when it stops listening, either from us or from silence
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    // fires if something goes wrong, e.g. no-speech, network, not-allowed
+    recognition.onerror = (event) => {
+      setError(`Voice input error: ${event.error}`);
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
   }
 
   async function handleConfirm(messageIndex, itemIndex, proposal) {
@@ -137,6 +180,15 @@ export default function Chat() {
           placeholder="Type a message..."
           onChange={(event) => setMessage(event.target.value)}
         />
+        {/* mic button, talks to the toggleListening function above */}
+        <button
+          type="button"
+          onClick={toggleListening}
+          aria-label={isListening ? 'Stop listening' : 'Speak your message'}
+          className={isListening ? 'is-listening' : ''}
+        >
+          {isListening ? '⏹' : '🎤'}
+        </button>
         <button type="submit" disabled={isLoading || !message.trim()}>
           {isLoading ? 'Sending...' : 'Send'}
         </button>
