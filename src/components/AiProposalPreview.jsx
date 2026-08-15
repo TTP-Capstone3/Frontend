@@ -40,7 +40,7 @@ export default function AiProposalPreview({
     <article className="ai-proposal-preview">
       <h3>{proposal.title}</h3>
 
-      <div className="ai-proposal-details">
+      <dl>
         {dates.map((date) => {
           const formattedDate = formatDate(
             date.value,
@@ -52,24 +52,27 @@ export default function AiProposalPreview({
           }
 
           return (
-            <p key={date.label}>
-              <strong>{date.label}:</strong> {formattedDate}
-            </p>
+            <div key={date.label}>
+              <dt>{date.label}</dt>
+              <dd>{formattedDate}</dd>
+            </div>
           );
         })}
 
         {showPriority && (
-          <p>
-            <strong>Priority:</strong> {proposal.priority}
-          </p>
+          <>
+            <dt>Priority</dt>
+            <dd>{proposal.priority}</dd>
+          </>
         )}
 
         {showLocation && (
-          <p>
-            <strong>Location:</strong> {proposal.location}
-          </p>
+          <>
+            <dt>Location</dt>
+            <dd>{proposal.location}</dd>
+          </>
         )}
-      </div>
+      </dl>
 
       {isSaved ? (
         <p role="status">Saved to calendar.</p>

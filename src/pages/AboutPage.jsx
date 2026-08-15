@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import calendarScreenshot from '../assets/calendar-screenshot.png';
 
 // Shown in the "Built by" section at the bottom of the page.
 const team = [
@@ -41,29 +42,9 @@ export default function AboutPage({ user }) {
         the free time to get it all done.
       </p>
 
-      {/* Placeholder app screenshot until we have a real one to swap in. */} {/*remove later after screenshot is added */}
-      <div className='mx-auto mb-16 flex max-w-2xl items-end justify-center gap-4'>
-        <div className='w-full rounded-lg border border-(--border) bg-(--code-bg) p-3'>
-          <div className='mb-3 flex gap-1.5'>
-            <span className='h-2.5 w-2.5 rounded-full bg-(--border)' />
-            <span className='h-2.5 w-2.5 rounded-full bg-(--border)' />
-            <span className='h-2.5 w-2.5 rounded-full bg-(--border)' />
-          </div>
-          <div className='space-y-2 text-left'>
-            <div className='h-4 w-1/3 rounded bg-(--border)' />
-            <div className='h-10 rounded border border-(--border) bg-(--bg)' />
-            <div className='h-10 rounded border border-(--border) bg-(--bg)' />
-            <div className='h-10 w-2/3 rounded border-2 border-(--accent) bg-(--bg)' />
-          </div>
-        </div>
-
-        <div className='hidden w-28 shrink-0 rounded-2xl border-4 border-(--border) bg-(--code-bg) p-2 sm:block'>
-          <div className='space-y-1.5'>
-            <div className='h-3 w-2/3 rounded bg-(--border)' />
-            <div className='h-6 rounded border border-(--border) bg-(--bg)' />
-            <div className='h-6 rounded border-2 border-(--accent) bg-(--bg)' />
-          </div>
-        </div>
+      {/* Real screenshot of the calendar and AI chat. */}
+      <div className='mx-auto mb-16 max-w-3xl overflow-hidden rounded-lg border border-(--border)'>
+        <img src={calendarScreenshot} alt='The calendar and AI chat' className='w-full' />
       </div>
 
       {/* One card per item in aiFeatures. */}
@@ -85,6 +66,7 @@ export default function AboutPage({ user }) {
         Get started →
       </Link>
 
+      {/* One circle per person in the team array. */}
       <div className='mt-20 border-t border-(--border) pt-6'>
         <p className='mb-3 text-sm'>Built by</p>
         <div className='flex justify-center gap-4'>
