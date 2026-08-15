@@ -29,10 +29,13 @@
     flex: 0 0 auto;
 }
 
-.chat-compose input {
-    /* Lets the input shrink instead of pushing the Send button out. */
+.chat-compose textarea {
+    /* Lets the text box shrink instead of pushing the Send button out. */
     flex: 1;
     min-width: 0;
+    max-height: 160px;
+    overflow-y: auto;
+    resize: none;
 }
 
 .chat-compose button {

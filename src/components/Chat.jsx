@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
 import { useSchedule } from '../context/ScheduleContext';
 import {
@@ -23,6 +23,17 @@ export default function Chat() {
   const { addItem } = useSchedule();
   const isSending = useRef(false);
   const isSaving = useRef(false);
+  const messageInput = useRef(null);
+
+  useEffect(() => {
+    if (!messageInput.current) {
+      return;
+    }
+
+    // Resize the text box when the message changes.
+    messageInput.current.style.height = 'auto';
+    messageInput.current.style.height = `${messageInput.current.scrollHeight}px`;
+  }, [message]);
 
   function handleCancel(messageIndex, itemIndex) {
     setMessages((currentMessages) =>
@@ -119,6 +130,13 @@ export default function Chat() {
     }
   }
 
+  function handleMessageKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form.requestSubmit();
+    }
+  }
+
   return (
     <section className="chat-bar">
       <h2>Chat</h2>
@@ -157,13 +175,15 @@ export default function Chat() {
       </div>
 
       <form className="chat-compose" onSubmit={handleSubmit}>
-        <input
-          type="text"
+        <textarea
+          ref={messageInput}
+          rows={1}
           value={message}
           maxLength={2000}
           aria-label="Message for the AI calendar assistant"
           placeholder="Type a message..."
           onChange={(event) => setMessage(event.target.value)}
+          onKeyDown={handleMessageKeyDown}
         />
         <button type="submit" disabled={isLoading || !message.trim()}>
           {isLoading ? 'Sending...' : 'Send'}
