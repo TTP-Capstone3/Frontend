@@ -41,10 +41,6 @@ export default function AiProposalPreview({
       <h3>{proposal.title}</h3>
 
       <div className="ai-proposal-details">
-        <p>
-          <strong>Type:</strong> {proposal.itemType}
-        </p>
-
         {dates.map((date) => {
           const formattedDate = formatDate(
             date.value,
