@@ -32,14 +32,15 @@ export default function AiProposalPreview({
     { label: 'Reminder', value: proposal.reminderAt },
   ];
 
+  // Skip default values so the preview only shows useful details.
+  const showPriority = proposal.priority && proposal.priority !== 'none';
+  const showLocation = Boolean(proposal.location);
+
   return (
     <article className="ai-proposal-preview">
       <h3>{proposal.title}</h3>
 
       <dl>
-        <dt>Type</dt>
-        <dd>{proposal.itemType}</dd>
-
         {dates.map((date) => {
           const formattedDate = formatDate(
             date.value,
@@ -58,11 +59,19 @@ export default function AiProposalPreview({
           );
         })}
 
-        <dt>Priority</dt>
-        <dd>{proposal.priority || 'none'}</dd>
+        {showPriority && (
+          <>
+            <dt>Priority</dt>
+            <dd>{proposal.priority}</dd>
+          </>
+        )}
 
-        <dt>Location</dt>
-        <dd>{proposal.location || 'Not set'}</dd>
+        {showLocation && (
+          <>
+            <dt>Location</dt>
+            <dd>{proposal.location}</dd>
+          </>
+        )}
       </dl>
 
       {isSaved ? (

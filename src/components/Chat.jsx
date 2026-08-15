@@ -1,10 +1,15 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
 import { useSchedule } from '../context/ScheduleContext';
 import {
   markProposalSaved,
   removeProposal,
 } from '../utils/aiProposalMessages';
+import {
+  combineClarificationRequest,
+  getAiResponseText,
+  hasClarification,
+} from '../utils/aiClarification';
 import AiProposalPreview from './AiProposalPreview';
 import '../styles/chat.css';
 
@@ -18,14 +23,27 @@ export default function Chat() {
   //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
   const recognitionRef = useRef(null);
   const [savingItem, setSavingItem] = useState(null);
+  const [pendingRequest, setPendingRequest] = useState('');
   const { addItem } = useSchedule();
   const isSending = useRef(false);
   const isSaving = useRef(false);
+  const messageInput = useRef(null);
+
+  useEffect(() => {
+    if (!messageInput.current) {
+      return;
+    }
+
+    // Resize the text box when the message changes.
+    messageInput.current.style.height = 'auto';
+    messageInput.current.style.height = `${messageInput.current.scrollHeight}px`;
+  }, [message]);
 
   function handleCancel(messageIndex, itemIndex) {
     setMessages((currentMessages) =>
       removeProposal(currentMessages, messageIndex, itemIndex),
     );
+    setPendingRequest('');
   }
   // this function will turn the mic on and off.
   function toggleListening() {
@@ -83,6 +101,7 @@ export default function Chat() {
       setMessages((currentMessages) =>
         markProposalSaved(currentMessages, messageIndex, itemIndex),
       );
+      setPendingRequest('');
     } catch (saveError) {
       const errorMessage =
         saveError instanceof Error
@@ -103,6 +122,20 @@ export default function Chat() {
       return;
     }
 
+    let requestMessage = cleanedMessage;
+
+    try {
+      if (pendingRequest) {
+        requestMessage = combineClarificationRequest(
+          pendingRequest,
+          cleanedMessage,
+        );
+      }
+    } catch (clarificationError) {
+      setError(clarificationError.message);
+      return;
+    }
+
     // Stops quick double clicks from sending the same message twice.
     isSending.current = true;
     setIsLoading(true);
@@ -116,13 +149,19 @@ export default function Chat() {
     try {
       const timeZone =
         Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-      const result = await requestScheduleProposal(cleanedMessage, timeZone);
+      const result = await requestScheduleProposal(requestMessage, timeZone);
+
+      if (hasClarification(result.items)) {
+        setPendingRequest(requestMessage);
+      } else {
+        setPendingRequest('');
+      }
 
       setMessages((currentMessages) => [
         ...currentMessages,
         {
           sender: 'ai',
-          text: result.reply,
+          text: getAiResponseText(result.items),
           items: result.items,
         },
       ]);
@@ -131,6 +170,13 @@ export default function Chat() {
     } finally {
       isSending.current = false;
       setIsLoading(false);
+    }
+  }
+
+  function handleMessageKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form.requestSubmit();
     }
   }
 
@@ -145,7 +191,7 @@ export default function Chat() {
             key={`${chatMessage.sender}-${messageIndex}`}
           >
             <strong>{chatMessage.sender === 'user' ? 'You' : 'AI'}</strong>
-            <p>{chatMessage.text}</p>
+            {chatMessage.text && <p>{chatMessage.text}</p>}
 
             {chatMessage.items?.map((item, itemIndex) =>
               item.kind === 'clarification' && item.question ? (
@@ -172,13 +218,15 @@ export default function Chat() {
       </div>
 
       <form className="chat-compose" onSubmit={handleSubmit}>
-        <input
-          type="text"
+        <textarea
+          ref={messageInput}
+          rows={1}
           value={message}
           maxLength={2000}
           aria-label="Message for the AI calendar assistant"
           placeholder="Type a message..."
           onChange={(event) => setMessage(event.target.value)}
+          onKeyDown={handleMessageKeyDown}
         />
         {/* mic button, talks to the toggleListening function above */}
         <button
