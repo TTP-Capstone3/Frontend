@@ -23,6 +23,7 @@ export default function Chat() {
   //start voice input set mic to rest state - Daniel - this state is when the mic is not on and not recieving Audio.
   const [isListening, setIsListening] = useState(false);
   //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
+  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
   const recognitionRef = useRef(null);
   const [savingItem, setSavingItem] = useState(null);
   const [pendingRequest, setPendingRequest] = useState('');
@@ -36,10 +37,38 @@ export default function Chat() {
     if (!messageInput.current) {
       return;
     }
+    
+    const defaultHeight = 30;
+    const maxHeight = 160;
+    const textarea = messageInput.current;
+    const shell = textarea.closest('.chat-input-shell');
 
-    // Resize the text box when the message changes.
-    messageInput.current.style.height = 'auto';
-    messageInput.current.style.height = `${messageInput.current.scrollHeight}px`;
+    textarea.style.height = 'auto';
+
+    if (!message) {
+      shell?.classList.remove('is-expanded');
+      textarea.style.height = `${defaultHeight}px`;
+      textarea.style.overflowY = 'hidden';
+      setIsComposerExpanded(false);
+      return;
+    }
+
+    // Measure in compact mode so the expand/shrink decision is stable.
+    shell?.classList.remove('is-expanded');
+    textarea.style.height = 'auto';
+
+    const compactScrollHeight = textarea.scrollHeight;
+    const shouldExpand = compactScrollHeight > defaultHeight + 4;
+
+    // Apply the layout we actually want before measuring final height.
+    shell?.classList.toggle('is-expanded', shouldExpand);
+    textarea.style.height = 'auto';
+
+    const finalScrollHeight = textarea.scrollHeight;
+    const nextHeight = Math.min(finalScrollHeight, maxHeight);
+    textarea.style.height = `${Math.max(nextHeight, defaultHeight)}px`;
+    textarea.style.overflowY = finalScrollHeight > maxHeight ? 'auto' : 'hidden';
+    setIsComposerExpanded(shouldExpand);
   }, [message]);
 
   function handleEdit(messageIndex, itemIndex, proposal) {
@@ -249,36 +278,41 @@ export default function Chat() {
         </div>
 
         <form className="chat-compose" onSubmit={handleSubmit}>
-          <textarea
-            ref={messageInput}
-            rows={1}
-            value={message}
-            maxLength={2000}
-            aria-label="Message for the AI calendar assistant"
-            placeholder="Type a message..."
-            onChange={(event) => setMessage(event.target.value)}
-            onKeyDown={handleMessageKeyDown}
-          />
-          {/* mic button, talks to the toggleListening function above */}
-          <button
-            type="button"
-            onClick={toggleListening}
-            aria-label={isListening ? 'Stop listening' : 'Speak your message'}
-            className={isListening ? 'is-listening' : ''}
-          >
-            {isListening ? (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                <path fillRule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clipRule="evenodd" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-              </svg>
-            )}
-          </button>
-          <button type="submit" disabled={isLoading || !message.trim()}>
-            {isLoading ? 'Sending...' : 'Send'}
-          </button>
+          <div className={`chat-input-shell${isComposerExpanded ? ' is-expanded' : ''}`}>
+            <textarea
+              ref={messageInput}
+              rows={1}
+              value={message}
+              maxLength={2000}
+              aria-label="Message for the AI calendar assistant"
+              placeholder="Type a message..."
+              onChange={(event) => setMessage(event.target.value)}
+              onKeyDown={handleMessageKeyDown}
+            />
+            
+            <div className="chat-input-actions">
+              {/* mic button, talks to the toggleListening function above */}
+              <button
+                type="button"
+                onClick={toggleListening}
+                aria-label={isListening ? 'Stop listening' : 'Speak your message'}
+                className={isListening ? 'is-listening' : ''}
+              >
+                {isListening ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                    <path fillRule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+                  </svg>
+                )}
+              </button>
+              <button type="submit" disabled={isLoading || !message.trim()}>
+                {isLoading ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+          </div>
         </form>
       </section>
       {editingProposal && (
