@@ -23,7 +23,6 @@ export default function Chat() {
   //start voice input set mic to rest state - Daniel - this state is when the mic is not on and not recieving Audio.
   const [isListening, setIsListening] = useState(false);
   //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
-  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
   const recognitionRef = useRef(null);
   const [savingItem, setSavingItem] = useState(null);
   const [pendingRequest, setPendingRequest] = useState('');
@@ -37,7 +36,7 @@ export default function Chat() {
     if (!messageInput.current) {
       return;
     }
-    
+
     const defaultHeight = 30;
     const maxHeight = 160;
     const textarea = messageInput.current;
@@ -49,7 +48,6 @@ export default function Chat() {
       shell?.classList.remove('is-expanded');
       textarea.style.height = `${defaultHeight}px`;
       textarea.style.overflowY = 'hidden';
-      setIsComposerExpanded(false);
       return;
     }
 
@@ -68,11 +66,10 @@ export default function Chat() {
     const nextHeight = Math.min(finalScrollHeight, maxHeight);
     textarea.style.height = `${Math.max(nextHeight, defaultHeight)}px`;
     textarea.style.overflowY = finalScrollHeight > maxHeight ? 'auto' : 'hidden';
-    setIsComposerExpanded(shouldExpand);
   }, [message]);
 
   function handleEdit(messageIndex, itemIndex, proposal) {
-    setEditingProposal({messageIndex, itemIndex, proposal});
+    setEditingProposal({ messageIndex, itemIndex, proposal });
   }
 
   function handleCancel(messageIndex, itemIndex) {
@@ -278,7 +275,7 @@ export default function Chat() {
         </div>
 
         <form className="chat-compose" onSubmit={handleSubmit}>
-          <div className={`chat-input-shell${isComposerExpanded ? ' is-expanded' : ''}`}>
+          <div className="chat-input-shell">
             <textarea
               ref={messageInput}
               rows={1}
@@ -289,7 +286,7 @@ export default function Chat() {
               onChange={(event) => setMessage(event.target.value)}
               onKeyDown={handleMessageKeyDown}
             />
-            
+
             <div className="chat-input-actions">
               {/* mic button, talks to the toggleListening function above */}
               <button
