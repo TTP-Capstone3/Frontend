@@ -96,11 +96,18 @@ export default function Chat() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
+    // without this it auto-stops after the first pause instead of waiting for us to click stop
+    recognition.continuous = true;
+    // shows the text live as you talk instead of only at the very end
+    recognition.interimResults = true;
 
-    // fires once the browser finishes transcribing what you said
+    // fires repeatedly while you talk, with everything transcribed so far
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setMessage((currentMessage) => `${currentMessage} ${transcript}`.trim());
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setMessage(transcript.trim());
     };
 
     // fires when it stops listening, either from us or from silence
