@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router';
 import { useAuth0 } from '@auth0/auth0-react';
 
 import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedPage from './pages/ProtectedPage';

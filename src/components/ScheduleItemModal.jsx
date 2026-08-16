@@ -419,7 +419,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft }) 
           </button>
 
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? isEditing ? 'Saving...' : 'Creating...' : isEditing ? 'Save Changes' : 'Create'}
+            {isSubmitting ? isEditing ? 'Saving...' : 'Creating...' : isEditing ? 'Save Draft' : 'Create'}
           </button>
         </footer>
       </form>
