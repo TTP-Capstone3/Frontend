@@ -20,6 +20,7 @@ function formatDate(dateValue, timeZone, allDay) {
 export default function AiProposalPreview({
   proposal,
   onConfirm,
+  onEdit,
   onCancel,
   isSaving = false,
   isSaved = false,
@@ -78,6 +79,7 @@ export default function AiProposalPreview({
         <p role="status">Saved to calendar.</p>
       ) : (
         <div className="ai-proposal-actions">
+          {/* Confirmation button */}
           <button
             type="button"
             onClick={onConfirm}
@@ -86,6 +88,18 @@ export default function AiProposalPreview({
           >
             {isSaving ? 'Saving...' : 'Confirm'}
           </button>
+
+          {/* Edit button */}
+          <button
+            type="button"
+            onClick={onEdit}
+            disabled={actionsDisabled}
+            aria-label={`Edit ${proposal.title}`}
+          >
+            Edit
+          </button>
+
+          {/* Cancel button */}
           <button
             type="button"
             onClick={onCancel}
