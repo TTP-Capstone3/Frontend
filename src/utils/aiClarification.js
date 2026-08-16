@@ -18,11 +18,11 @@ export function getAiResponseText(items) {
     : 0;
 
   if (proposalCount === 1) {
-    return 'Review this item:';
+    return 'Please review this item:';
   }
 
   if (proposalCount > 1) {
-    return `Review these ${proposalCount} items:`;
+    return `Please review these ${proposalCount} items:`;
   }
 
   return '';

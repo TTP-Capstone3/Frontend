@@ -27,3 +27,18 @@ export function markProposalSaved(messages, messageIndex, itemIndex) {
     };
   });
 }
+
+export function updateProposal(messages, messageIndex, itemIndex, updatedProposal) {
+  return messages.map((chatMessage, currentMessageIndex) => {
+    if (currentMessageIndex !== messageIndex) {
+      return chatMessage;
+    }
+
+    return {
+      ...chatMessage,
+      items: chatMessage.items.map((item, currentItemIndex) =>
+        currentItemIndex === itemIndex ? { ...item, proposal: updatedProposal } : item,
+      ),
+    };
+  });
+}

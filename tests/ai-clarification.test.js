@@ -56,10 +56,10 @@ test('does not repeat the AI reply when a clarification is shown', () => {
 });
 
 test('uses a short message for schedule proposals', () => {
-  assert.equal(getAiResponseText([{ kind: 'proposal' }]), 'Review this item:');
+  assert.equal(getAiResponseText([{ kind: 'proposal' }]), 'Please review this item:');
   assert.equal(
     getAiResponseText([{ kind: 'proposal' }, { kind: 'proposal' }]),
-    'Review these 2 items:',
+    'Please review these 2 items:',
   );
 });
 
