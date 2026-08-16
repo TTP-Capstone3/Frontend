@@ -31,29 +31,31 @@ const aiFeatures = [
 export default function AboutPage({ user }) {
   return (
     <section className='text-center'>
-      <h1 className='text-6xl'>Plan your schedule with AI assistance.</h1>
-      <p className='mb-4 text-lg'>
+      <h1 className='text-4xl'>Plan your schedule with AI assistance.</h1>
+      <p className='mb-3 text-base'>
         A task manager that utlizies AI to turn your to-do list into an actual
         schedule.
       </p>
-      <p className='mx-auto mb-10 max-w-md text-sm'>
+      <p className='mx-auto mb-8 max-w-md text-xs'>
         Add your list of tasks, events, and reminders in plain English. The AI translates them into schedule items and
         slots them into your schedule, catches conflicts before they happen, and finds you
         the free time to get it all done.
       </p>
 
-      {/* Real screenshot of the calendar and AI chat. */}
-      <div className='mx-auto mb-16 max-w-3xl overflow-hidden rounded-lg border border-(--border)'>
-        <img src={calendarScreenshot} alt='The calendar and AI chat' className='w-full' />
+      {/* Breaks out of the page's normal max-w-3xl so the image can go wider. */}
+      <div className='relative left-1/2 mb-16 w-screen -translate-x-1/2 px-4'>
+        <div className='mx-auto max-w-6xl overflow-hidden rounded-lg border border-(--border)'>
+          <img src={calendarScreenshot} alt='The calendar and AI chat' className='w-full' />
+        </div>
       </div>
 
       {/* One card per item in aiFeatures. */}
-      <div className='mx-auto mb-16 grid max-w-2xl gap-8 text-left sm:grid-cols-3'>
+      <div className='mx-auto mb-16 grid max-w-2xl gap-6 text-left sm:grid-cols-3'>
         {aiFeatures.map((feature) => (
           <div key={feature.title}>
-            <p className='mb-2 text-2xl'>{feature.emoji}</p>
-            <p className='mb-1 font-medium text-(--text-h)'>{feature.title}</p>
-            <p className='text-sm'>{feature.description}</p>
+            <p className='mb-1 text-lg'>{feature.emoji}</p>
+            <p className='mb-1 text-sm font-medium text-(--text-h)'>{feature.title}</p>
+            <p className='text-xs'>{feature.description}</p>
           </div>
         ))}
       </div>
