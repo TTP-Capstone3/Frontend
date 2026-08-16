@@ -247,7 +247,7 @@ export default function Chat() {
               className={`chat-message ${chatMessage.sender}-message`}
               key={`${chatMessage.sender}-${messageIndex}`}
             >
-              <strong>{chatMessage.sender === 'user' ? 'You' : 'AI'}</strong>
+              <strong>{chatMessage.sender === 'user' ? 'You:' : 'AI:'}</strong>
               {chatMessage.text && <p>{chatMessage.text}</p>}
 
               {chatMessage.items?.map((item, itemIndex) =>

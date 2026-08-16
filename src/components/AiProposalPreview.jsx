@@ -17,6 +17,31 @@ function formatDate(dateValue, timeZone, allDay) {
   );
 }
 
+const PRIORITIES = [
+  { value: 'none', label: 'No Priority' },
+  { value: 'very low', label: 'Very Low' },
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+  { value: 'very high', label: 'Very High' },
+];
+
+// Same colors as the priority dots on the calendar/organizer, keyed by priority value.
+const PRIORITY_DOT_COLORS = {
+  'very low': '#60a5fa',
+  low: '#34d399',
+  medium: '#fbbf24',
+  high: '#fb923c',
+  'very high': '#f87171',
+};
+
+const ITEM_TYPES = [
+  { value: 'task', label: 'Task' },
+  { value: 'event', label: 'Event' },
+  { value: 'reminder', label: 'Reminder' },
+  { value: 'note', label: 'Note' },
+];
+
 export default function AiProposalPreview({
   proposal,
   onConfirm,
@@ -33,6 +58,9 @@ export default function AiProposalPreview({
     { label: 'Reminder', value: proposal.reminderAt },
   ];
 
+  const priorityOption = PRIORITIES.find((priority) => priority.value === proposal.priority);
+  const itemTypeOption = ITEM_TYPES.find((type) => type.value === proposal.itemType);
+
   // Skip default values so the preview only shows useful details.
   const showPriority = proposal.priority && proposal.priority !== 'none';
   const showLocation = Boolean(proposal.location);
@@ -42,6 +70,10 @@ export default function AiProposalPreview({
       <h3>{proposal.title}</h3>
 
       <dl>
+        <div className="ai-proposal-detail">
+          <dt>Type</dt>
+          <dd>{itemTypeOption?.label || proposal.itemType}</dd>
+        </div>
         {dates.map((date) => {
           const formattedDate = formatDate(
             date.value,
@@ -53,7 +85,7 @@ export default function AiProposalPreview({
           }
 
           return (
-            <div key={date.label}>
+            <div className="ai-proposal-detail" key={date.label}>
               <dt>{date.label}</dt>
               <dd>{formattedDate}</dd>
             </div>
@@ -61,17 +93,24 @@ export default function AiProposalPreview({
         })}
 
         {showPriority && (
-          <>
+          <div className="ai-proposal-detail">
             <dt>Priority</dt>
-            <dd>{proposal.priority}</dd>
-          </>
+            <dd className="ai-proposal-priority">
+              <span
+                className="ai-proposal-priority-dot"
+                style={{ background: PRIORITY_DOT_COLORS[proposal.priority] }}
+                aria-hidden="true"
+              />
+              {priorityOption?.label || proposal.priority}
+            </dd>
+          </div>
         )}
 
         {showLocation && (
-          <>
+          <div className="ai-proposal-detail">
             <dt>Location</dt>
             <dd>{proposal.location}</dd>
-          </>
+          </div>
         )}
       </dl>
 

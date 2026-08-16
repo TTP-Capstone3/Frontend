@@ -43,8 +43,8 @@
 }
 
 .chat-message strong {
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 750;
     color: var(--text);
     margin-bottom: 2px;
 }
@@ -84,20 +84,41 @@
 }
 
 .ai-proposal-preview dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 2px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin: 0;
+}
+
+.ai-proposal-detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .ai-proposal-preview dt {
-    color: var(--text);
-    font-weight: 500;
+    flex: 0 0 auto;
 }
 
 .ai-proposal-preview dd {
+    min-width: 0;
     margin: 0;
-    color: var(--text-h);
+    text-align: right;
+}
+
+.ai-proposal-priority {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.ai-proposal-priority-dot {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
 }
 
 .ai-proposal-actions {
