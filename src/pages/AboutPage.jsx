@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import calendarScreenshot from '../assets/calendar-screenshot.png';
+import calendarScreenshot from '../assets/calendar-screenshot.jpg';
 
 // Shown in the "Built by" section at the bottom of the page.
 const team = [
