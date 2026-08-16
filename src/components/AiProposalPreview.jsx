@@ -35,13 +35,6 @@ const PRIORITY_DOT_COLORS = {
   'very high': '#f87171',
 };
 
-const ITEM_TYPES = [
-  { value: 'task', label: 'Task' },
-  { value: 'event', label: 'Event' },
-  { value: 'reminder', label: 'Reminder' },
-  { value: 'note', label: 'Note' },
-];
-
 export default function AiProposalPreview({
   proposal,
   onConfirm,
@@ -59,7 +52,6 @@ export default function AiProposalPreview({
   ];
 
   const priorityOption = PRIORITIES.find((priority) => priority.value === proposal.priority);
-  const itemTypeOption = ITEM_TYPES.find((type) => type.value === proposal.itemType);
 
   // Skip default values so the preview only shows useful details.
   const showPriority = proposal.priority && proposal.priority !== 'none';
@@ -70,10 +62,6 @@ export default function AiProposalPreview({
       <h3>{proposal.title}</h3>
 
       <dl>
-        <div className="ai-proposal-detail">
-          <dt>Type</dt>
-          <dd>{itemTypeOption?.label || proposal.itemType}</dd>
-        </div>
         {dates.map((date) => {
           const formattedDate = formatDate(
             date.value,
