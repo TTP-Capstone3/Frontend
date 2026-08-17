@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
 import { useSchedule } from '../context/ScheduleContext';
 import {
+  applyFreeSlot,
   markProposalSaved,
   removeProposal,
   updateProposal,
@@ -10,6 +11,7 @@ import {
   combineClarificationRequest,
   getAiResponseText,
   hasClarification,
+  hasUnresolvedConflict,
 } from '../utils/aiClarification';
 import AiProposalPreview from './AiProposalPreview';
 import ScheduleItemModal from './ScheduleItemModal';
@@ -70,6 +72,12 @@ export default function Chat() {
 
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
+  }
+
+  function handleApplySlot(messageIndex, itemIndex, slot) {
+    setMessages((currentMessages) =>
+      applyFreeSlot(currentMessages, messageIndex, itemIndex, slot),
+    );
   }
 
   function handleCancel(messageIndex, itemIndex) {
@@ -211,7 +219,9 @@ export default function Chat() {
         Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
       const result = await requestScheduleProposal(requestMessage, timeZone);
 
-      if (hasClarification(result.items)) {
+      // a conflicting proposal needs the same "reply with more details" flow
+      // as a clarification, so a follow-up like "5 to 5:30 instead" has context
+      if (hasClarification(result.items) || hasUnresolvedConflict(result.items)) {
         setPendingRequest(requestMessage);
       } else {
         setPendingRequest('');
@@ -261,11 +271,16 @@ export default function Chat() {
                   <AiProposalPreview
                     key={`proposal-${itemIndex}`}
                     proposal={item.proposal}
+                    conflicts={item.conflicts}
+                    freeSlots={item.freeSlots}
                     onConfirm={() =>
                       handleConfirm(messageIndex, itemIndex, item.proposal)
                     }
                     onEdit={() =>
                       handleEdit(messageIndex, itemIndex, item.proposal)
+                    }
+                    onSelectSlot={(slot) =>
+                      handleApplySlot(messageIndex, itemIndex, slot)
                     }
                     onCancel={() => handleCancel(messageIndex, itemIndex)}
                     isSaving={savingItem === `${messageIndex}-${itemIndex}`}

@@ -17,6 +17,12 @@ function formatDate(dateValue, timeZone, allDay) {
   );
 }
 
+function formatTime(dateValue, timeZone) {
+  return new Intl.DateTimeFormat(undefined, { timeStyle: 'short', timeZone }).format(
+    new Date(dateValue),
+  );
+}
+
 const PRIORITIES = [
   { value: 'none', label: 'No Priority' },
   { value: 'very low', label: 'Very Low' },
@@ -44,13 +50,17 @@ const ITEM_TYPES = [
 
 export default function AiProposalPreview({
   proposal,
+  conflicts = [],
+  freeSlots = [],
   onConfirm,
   onEdit,
   onCancel,
+  onSelectSlot,
   isSaving = false,
   isSaved = false,
   actionsDisabled = false,
 }) {
+  const hasConflicts = conflicts.length > 0;
   const dates = [
     { label: 'Starts', value: proposal.startAt },
     { label: 'Ends', value: proposal.endAt },
@@ -68,6 +78,35 @@ export default function AiProposalPreview({
   return (
     <article className="ai-proposal-preview">
       <h3>{proposal.title}</h3>
+
+      {hasConflicts && (
+        <div className="ai-proposal-conflict-warning" role="alert">
+          <p>This overlaps with something already on your calendar:</p>
+          <ul>
+            {conflicts.map((conflict) => (
+              <li key={conflict.id}>{conflict.title}</li>
+            ))}
+          </ul>
+
+          {freeSlots.length > 0 && (
+            <>
+              <p>You're free at:</p>
+              <div className="ai-proposal-slot-suggestions">
+                {freeSlots.map((slot) => (
+                  <button
+                    key={slot.start}
+                    type="button"
+                    onClick={() => onSelectSlot?.(slot)}
+                    disabled={!onSelectSlot || actionsDisabled}
+                  >
+                    {formatTime(slot.start, proposal.timeZone)} – {formatTime(slot.end, proposal.timeZone)}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <dl>
         <div className="ai-proposal-detail">
@@ -118,14 +157,15 @@ export default function AiProposalPreview({
         <p role="status">Saved to calendar.</p>
       ) : (
         <div className="ai-proposal-actions">
-          {/* Confirmation button */}
+          {/* Confirmation button, calls out the conflict if there is one */}
           <button
             type="button"
             onClick={onConfirm}
             disabled={!onConfirm || actionsDisabled}
             aria-label={`Confirm ${proposal.title}`}
+            className={hasConflicts ? 'ai-proposal-confirm-warning' : ''}
           >
-            {isSaving ? 'Saving...' : 'Confirm'}
+            {isSaving ? 'Saving...' : hasConflicts ? 'Confirm anyway' : 'Confirm'}
           </button>
 
           {/* Edit button */}

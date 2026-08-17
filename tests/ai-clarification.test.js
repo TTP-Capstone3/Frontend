@@ -5,6 +5,7 @@ import {
   combineClarificationRequest,
   getAiResponseText,
   hasClarification,
+  hasUnresolvedConflict,
   MAX_AI_MESSAGE_LENGTH,
 } from '../src/utils/aiClarification.js';
 
@@ -61,6 +62,17 @@ test('uses a short message for schedule proposals', () => {
     getAiResponseText([{ kind: 'proposal' }, { kind: 'proposal' }]),
     'Please review these 2 items:',
   );
+});
+
+test('recognizes a proposal with an unresolved conflict', () => {
+  const items = [
+    { kind: 'proposal', conflicts: [{ id: '1', title: 'Dentist' }] },
+  ];
+
+  assert.equal(hasUnresolvedConflict(items), true);
+  assert.equal(hasUnresolvedConflict([{ kind: 'proposal', conflicts: [] }]), false);
+  assert.equal(hasUnresolvedConflict([{ kind: 'clarification' }]), false);
+  assert.equal(hasUnresolvedConflict(null), false);
 });
 
 test('requires both parts of a clarification request', () => {

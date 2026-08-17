@@ -121,6 +121,46 @@
     border-radius: 50%;
 }
 
+.ai-proposal-conflict-warning {
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #f87171;
+    background: rgba(248, 113, 113, 0.1);
+    font-size: 12px;
+}
+
+.ai-proposal-conflict-warning p {
+    margin: 0 0 4px;
+    font-weight: 500;
+}
+
+.ai-proposal-conflict-warning ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.ai-proposal-slot-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.ai-proposal-slot-suggestions button {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--code-bg);
+    color: var(--text-h);
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.ai-proposal-slot-suggestions button:hover {
+    border-color: var(--accent);
+}
+
 .ai-proposal-actions {
     display: flex;
     gap: 8px;
@@ -142,6 +182,12 @@
     background: var(--accent);
     color: white;
     border-color: var(--accent);
+}
+
+.ai-proposal-actions button.ai-proposal-confirm-warning {
+    background: #f87171;
+    border-color: #f87171;
+    color: white;
 }
 
 .chat-compose {
