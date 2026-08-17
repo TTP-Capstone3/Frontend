@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
-import { loadAiMessages, saveAiMessage } from '../api/aiConversation';
+import {
+  loadAiMessages,
+  saveAiMessage,
+  updateAiMessageItems,
+} from '../api/aiConversation';
 import { useSchedule } from '../context/ScheduleContext';
 import {
   setLastMessageId,
@@ -117,11 +121,29 @@ export default function Chat() {
     );
   }
 
-  function handleCancel(messageIndex, itemIndex) {
-    setMessages((currentMessages) =>
-      removeProposal(currentMessages, messageIndex, itemIndex),
-    );
+  // Keeps the saved copy of an AI message in step with what the chat shows, so
+  // the same proposals come back after a refresh.
+  async function syncMessageItems(updatedMessages, messageIndex) {
+    const savedMessage = updatedMessages[messageIndex];
+
+    if (!savedMessage || !savedMessage.id) {
+      return;
+    }
+
+    await updateAiMessageItems(savedMessage.id, toSavedItems(savedMessage.items));
+  }
+
+  async function handleCancel(messageIndex, itemIndex) {
+    const updatedMessages = removeProposal(messages, messageIndex, itemIndex);
+
+    setMessages(updatedMessages);
     setPendingRequest('');
+
+    try {
+      await syncMessageItems(updatedMessages, messageIndex);
+    } catch (historyError) {
+      setError(historyError.message);
+    }
   }
 
   // this function will turn the mic on and off.
@@ -184,10 +206,21 @@ export default function Chat() {
       allDay: proposal.allDay ?? false,
     };
 
-    setMessages((currentMessages) =>
-      updateProposal(currentMessages, messageIndex, itemIndex, updatedProposal),
+    const updatedMessages = updateProposal(
+      messages,
+      messageIndex,
+      itemIndex,
+      updatedProposal,
     );
+
+    setMessages(updatedMessages);
     setEditingProposal(null);
+
+    try {
+      await syncMessageItems(updatedMessages, messageIndex);
+    } catch (historyError) {
+      setError(historyError.message);
+    }
   }
 
   async function handleConfirm(messageIndex, itemIndex, proposal) {
@@ -203,10 +236,24 @@ export default function Chat() {
     try {
       await addItem(proposal);
 
-      setMessages((currentMessages) =>
-        markProposalSaved(currentMessages, messageIndex, itemIndex),
+      // Mark it saved before touching history so a second click cannot add the
+      // same item to the calendar twice.
+      const updatedMessages = markProposalSaved(
+        messages,
+        messageIndex,
+        itemIndex,
       );
+
+      setMessages(updatedMessages);
       setPendingRequest('');
+
+      try {
+        await syncMessageItems(updatedMessages, messageIndex);
+      } catch {
+        setError(
+          'Saved to your calendar, but the chat history did not update.',
+        );
+      }
     } catch (saveError) {
       const errorMessage =
         saveError instanceof Error
