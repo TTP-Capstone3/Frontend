@@ -7,6 +7,15 @@ export function hasClarification(items) {
   );
 }
 
+export function hasUnresolvedConflict(items) {
+  return (
+    Array.isArray(items) &&
+    items.some(
+      (item) => item?.kind === 'proposal' && item.conflicts?.length > 0,
+    )
+  );
+}
+
 export function getAiResponseText(items) {
   // The question already contains the details the user needs.
   if (hasClarification(items)) {
@@ -18,11 +27,11 @@ export function getAiResponseText(items) {
     : 0;
 
   if (proposalCount === 1) {
-    return 'Review this item:';
+    return 'Please review this item:';
   }
 
   if (proposalCount > 1) {
-    return `Review these ${proposalCount} items:`;
+    return `Please review these ${proposalCount} items:`;
   }
 
   return '';

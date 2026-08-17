@@ -153,7 +153,7 @@ function toDateTimeInput(value) {
   return format(new Date(value), "yyyy-MM-dd'T'HH:mm");
 }
 
-export default function ScheduleItemModal({ onClose, itemToEdit }) {
+export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft }) {
   const { addItem, updateItem } = useSchedule();
 
   // Common fields
@@ -179,6 +179,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = Boolean(itemToEdit);
+  const isDraftEditing = (typeof (onSaveDraft) === 'function');
 
   function validateForm() {
     if (!title.trim()) {
@@ -254,7 +255,9 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
       setFormError(null);
 
       const item = buildScheduleItem();
-      if (isEditing) {
+      if (isDraftEditing) {
+        await onSaveDraft(item)
+      } else if (isEditing) {
         await updateItem(itemToEdit.id, item);
       } else {
         await addItem(item);
@@ -336,17 +339,13 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
             </label>
 
             <label className="schedule-item-field"> Estimated duration
-              <div className="schedule-item-duration">
-                <input
-                  type="number"
-                  min="1"
-                  value={estimatedMinutes}
-                  onChange={(event) => setEstimatedMinutes(event.target.value)}
-                  placeholder="60"
-                />
-
-                <span>minutes</span>
-              </div>
+              <input
+                type="number"
+                min="1"
+                value={estimatedMinutes}
+                onChange={(event) => setEstimatedMinutes(event.target.value)}
+                placeholder="Minutes"
+              />
             </label>
           </>
         )}
@@ -416,7 +415,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit }) {
           </button>
 
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? isEditing ? 'Saving...' : 'Creating...' : isEditing ? 'Save Changes' : 'Create'}
+            {isSubmitting ? isDraftEditing ? 'Saving Draft...' : isEditing ? 'Saving...' : 'Creating...' : isDraftEditing ? 'Save Draft' : isEditing ? 'Save Changes' : 'Create'}
           </button>
         </footer>
       </form>

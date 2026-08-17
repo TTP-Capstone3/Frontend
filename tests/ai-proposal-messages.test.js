@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   markProposalSaved,
   removeProposal,
+  updateProposal,
 } from '../src/utils/aiProposalMessages.js';
 
 const makeMessages = () => [
@@ -31,4 +32,21 @@ test('confirm marks only the selected proposal as saved', () => {
   assert.equal(messages[1].items[0].isSaved, true);
   assert.equal(messages[1].items[1].isSaved, undefined);
   assert.equal(messages[1].items[1].proposal.title, 'Gym');
+});
+
+test('edit updates only the selected proposal', () => {
+  const updatedProposal = {
+    title: 'Evening Gym',
+    priority: 'high',
+  };
+
+  const messages = updateProposal(makeMessages(), 1, 1, updatedProposal);
+  assert.deepEqual(messages[1].items[1].proposal, updatedProposal);
+  assert.equal(messages[1].items[0].proposal.title, 'Breakfast');
+});
+
+test('edit does not mutate the original messages', () => {
+  const originalMessages = makeMessages();
+  updateProposal(originalMessages, 1, 1, { title: 'Evening Gym' });
+  assert.equal(originalMessages[1].items[1].proposal.title, 'Gym');
 });
