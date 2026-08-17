@@ -14,7 +14,7 @@
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 8px;
-  padding: 20px;
+  padding: 14px 16px;
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
@@ -25,13 +25,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #f87171;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-header button:hover {
+  background: color-mix(in srgb, #f87171 12%, transparent);
+  border-radius: 6px;
 }
 
 .schedule-item-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
 }
 
 .schedule-item-field {
@@ -49,7 +70,9 @@
       transparent);
   border-radius: 6px;
   padding: 8px;
-  outline: 1px solid currentColor;
+  background: var(--code-bg);
+  color: var(--text-h);
+  outline: none;
 }
 
 .schedule-item-field textarea {
@@ -91,15 +114,21 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px;
   outline: 1px solid currentColor;
-  background: transparent;
-  color: inherit;
+  background: var(--code-bg);
+  color: var(--text-h);
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.schedule-item-field input:focus,
+.schedule-item-field textarea:focus,
+.field-dropdown-trigger:focus {
+  border-color: var(--accent);
 }
 
 .field-dropdown-menu {
@@ -144,4 +173,29 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 4px;
+}
+
+.schedule-item-form-actions button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+.schedule-item-form-actions button[type='submit'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.schedule-item-form-actions button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.schedule-item-form-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

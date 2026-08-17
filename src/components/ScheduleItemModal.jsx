@@ -179,7 +179,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft }) 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = Boolean(itemToEdit);
-  const isDraftEditing = (typeof(onSaveDraft) === 'function');
+  const isDraftEditing = (typeof (onSaveDraft) === 'function');
 
   function validateForm() {
     if (!title.trim()) {
@@ -339,17 +339,13 @@ export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft }) 
             </label>
 
             <label className="schedule-item-field"> Estimated duration
-              <div className="schedule-item-duration">
-                <input
-                  type="number"
-                  min="1"
-                  value={estimatedMinutes}
-                  onChange={(event) => setEstimatedMinutes(event.target.value)}
-                  placeholder="60"
-                />
-
-                <span>minutes</span>
-              </div>
+              <input
+                type="number"
+                min="1"
+                value={estimatedMinutes}
+                onChange={(event) => setEstimatedMinutes(event.target.value)}
+                placeholder="Minutes"
+              />
             </label>
           </>
         )}
@@ -419,7 +415,7 @@ export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft }) 
           </button>
 
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? isEditing ? 'Saving...' : 'Creating...' : isEditing ? 'Save Draft' : 'Create'}
+            {isSubmitting ? isDraftEditing ? 'Saving Draft...' : isEditing ? 'Saving...' : 'Creating...' : isDraftEditing ? 'Save Draft' : isEditing ? 'Save Changes' : 'Create'}
           </button>
         </footer>
       </form>
