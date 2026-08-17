@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
+import { loadAiMessages } from '../api/aiConversation';
 import { useSchedule } from '../context/ScheduleContext';
+import { toChatMessages } from '../utils/aiHistoryMessages';
 import {
   applyFreeSlot,
   markProposalSaved,
@@ -21,6 +23,7 @@ export default function Chat() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState('');
   //start voice input set mic to rest state - Daniel - this state is when the mic is not on and not recieving Audio.
   const [isListening, setIsListening] = useState(false);
@@ -69,6 +72,36 @@ export default function Chat() {
     textarea.style.height = `${Math.max(nextHeight, defaultHeight)}px`;
     textarea.style.overflowY = finalScrollHeight > maxHeight ? 'auto' : 'hidden';
   }, [message]);
+
+  // Bring the saved conversation back when the chat opens. The cancelled flag
+  // keeps the second run React does in development from setting state twice.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHistory() {
+      try {
+        const savedMessages = await loadAiMessages();
+
+        if (!cancelled) {
+          setMessages(toChatMessages(savedMessages));
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError.message);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingHistory(false);
+        }
+      }
+    }
+
+    loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
@@ -186,7 +219,7 @@ export default function Chat() {
     event.preventDefault();
 
     const cleanedMessage = message.trim();
-    if (!cleanedMessage || isSending.current) {
+    if (!cleanedMessage || isSending.current || isLoadingHistory) {
       return;
     }
 
@@ -292,6 +325,7 @@ export default function Chat() {
             </div>
           ))}
 
+          {isLoadingHistory && <p role="status">Loading your chat...</p>}
           {isLoading && <p role="status">Thinking...</p>}
           {error && <p role="alert">{error}</p>}
         </div>
