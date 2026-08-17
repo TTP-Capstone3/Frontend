@@ -244,11 +244,11 @@ export default function MyCalendar({ scheduleItems = [], onEditItem }) {
     function handleSelectEvent(event, mouseEvent) {
         const eventRect = mouseEvent.currentTarget.getBoundingClientRect();
         const calendarRect = calendarRef.current.getBoundingClientRect();
-        const popoverWidth = 280;
+        const popoverWidth = 260;
         const gap = 8;
 
-        let left = (eventRect.left - calendarRect.left + eventRect.width / 2 - popoverWidth / 2);
-        const top = eventRect.bottom - calendarRect.top + gap;
+        let left = eventRect.left - calendarRect.left + calendarRef.current.scrollLeft + eventRect.width / 2 - popoverWidth / 2;
+        const top = eventRect.bottom - calendarRect.top + calendarRef.current.scrollTop + gap;
         left = Math.max(gap, left);
 
         if (left + popoverWidth > calendarRect.width - gap) {

@@ -7,8 +7,13 @@
   padding: 15px;
   /* Views like year (12 months) can be taller than month view — scroll
      instead of growing the panel (and the organizer/chat next to it). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
   overflow-y: auto;
 }
+
 
 @media (max-width: 480px) {
   .calendar-panel {
@@ -69,6 +74,10 @@
 .calendar-panel .rbc-time-view .rbc-allday-cell+.rbc-allday-cell,
 .calendar-panel .rbc-day-slot .rbc-time-slot {
   border-color: var(--border);
+}
+
+.calendar-panel .rbc-time-content {
+  overflow-y: visible;
 }
 
 /* Prev/next month filler cells: translucent grey instead of the library's opaque light grey. */
