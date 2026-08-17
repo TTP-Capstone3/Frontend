@@ -1,10 +1,10 @@
 .schedule-item-popover {
     position: absolute;
     z-index: 1000;
-    width: min(280px, calc(100vw - 24px));
-    padding: 14px;
+    width: min(260px, calc(100vw - 24px));
+    padding: 12px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--bg);
     color: var(--text);
     box-shadow: var(--shadow);
@@ -15,11 +15,12 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
 }
 
 .schedule-item-popover-header h3 {
     margin: 2px 0 0;
+    font-size: 18px;
     color: var(--text-h);
 }
 
@@ -29,22 +30,33 @@
 }
 
 .schedule-item-popover-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
     border: none;
     background: transparent;
-    color: inherit;
     cursor: pointer;
-    font-size: 18px;
+    line-height: 1;
+    font-size: 20px;
+}
+
+.schedule-item-popover-close:hover {
+  background: color-mix(in srgb, #f87171 12%, transparent);
 }
 
 .schedule-item-popover-description {
-    margin: 10px 0;
+    margin: 8px 0;
 }
 
 .schedule-item-popover-details {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px;
+    margin-top: 8px;
 }
 
 .schedule-item-popover-details div {
@@ -61,7 +73,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 12px;
 }
 
 .schedule-item-popover-priority {
@@ -77,4 +89,23 @@
 
 .schedule-item-popover-priority-label {
     text-transform: capitalize;
+}
+
+.schedule-item-popover-actions button {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+.schedule-item-popover-actions button:hover {
+  filter: brightness(1.08);
+}
+
+.schedule-item-popover-actions button:last-child {
+  border-color: #f87171;
+  color: #f87171;
 }
