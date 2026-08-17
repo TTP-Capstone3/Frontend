@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
-import { loadAiMessages } from '../api/aiConversation';
+import { loadAiMessages, saveAiMessage } from '../api/aiConversation';
 import { useSchedule } from '../context/ScheduleContext';
-import { toChatMessages } from '../utils/aiHistoryMessages';
+import {
+  setLastMessageId,
+  toChatMessages,
+  toSavedItems,
+} from '../utils/aiHistoryMessages';
 import {
   applyFreeSlot,
   markProposalSaved,
@@ -260,14 +264,34 @@ export default function Chat() {
         setPendingRequest('');
       }
 
+      const aiText = getAiResponseText(result.items);
+
       setMessages((currentMessages) => [
         ...currentMessages,
         {
           sender: 'ai',
-          text: getAiResponseText(result.items),
+          text: aiText,
           items: result.items,
         },
       ]);
+
+      // Save only after Gemini replied, so a failed request is never stored and
+      // the backend does not see this prompt twice when it builds context.
+      try {
+        await saveAiMessage({ sender: 'user', text: cleanedMessage });
+
+        const savedAiMessage = await saveAiMessage({
+          sender: 'ai',
+          text: aiText,
+          items: toSavedItems(result.items),
+        });
+
+        setMessages((currentMessages) =>
+          setLastMessageId(currentMessages, savedAiMessage.id),
+        );
+      } catch (historyError) {
+        setError(historyError.message);
+      }
     } catch (requestError) {
       setError(requestError.message);
     } finally {

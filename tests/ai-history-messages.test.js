@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { toChatMessages } from '../src/utils/aiHistoryMessages.js';
+import {
+  setLastMessageId,
+  toChatMessages,
+  toSavedItems,
+} from '../src/utils/aiHistoryMessages.js';
 
 const savedUserMessage = {
   id: 'b1d0f1a2-0000-4000-8000-000000000001',
@@ -67,4 +71,74 @@ test('fills in missing text and items so the chat can render safely', () => {
 
   assert.equal(message.text, '');
   assert.deepEqual(message.items, []);
+});
+
+test('does not save conflicts or free slots with a proposal', () => {
+  const [savedItem] = toSavedItems([
+    {
+      kind: 'proposal',
+      proposal: { title: 'Study session', itemType: 'event' },
+      missingFields: [],
+      question: null,
+      isSaved: false,
+      conflicts: [{ id: 7, title: 'Weekly team sync' }],
+      freeSlots: [{ start: '2026-08-18T13:00:00.000Z' }],
+    },
+  ]);
+
+  assert.deepEqual(Object.keys(savedItem), [
+    'kind',
+    'proposal',
+    'missingFields',
+    'question',
+    'isSaved',
+  ]);
+  assert.equal(savedItem.conflicts, undefined);
+  assert.equal(savedItem.freeSlots, undefined);
+  assert.equal(savedItem.proposal.title, 'Study session');
+});
+
+test('keeps the question on a clarification and the saved flag on a proposal', () => {
+  const items = toSavedItems([
+    {
+      kind: 'clarification',
+      proposal: null,
+      missingFields: ['startAt', 'endAt'],
+      question: 'What time does soccer practice start and end?',
+    },
+    {
+      kind: 'proposal',
+      proposal: { title: 'Gym', itemType: 'event' },
+      missingFields: [],
+      question: null,
+      isSaved: true,
+    },
+  ]);
+
+  assert.equal(items[0].question, 'What time does soccer practice start and end?');
+  assert.deepEqual(items[0].missingFields, ['startAt', 'endAt']);
+  assert.equal(items[0].isSaved, false);
+  assert.equal(items[1].isSaved, true);
+});
+
+test('returns an empty item list when there are no items', () => {
+  assert.deepEqual(toSavedItems(undefined), []);
+  assert.deepEqual(toSavedItems([]), []);
+});
+
+test('puts the saved id on the last message only', () => {
+  const messages = [
+    { sender: 'user', text: 'Add gym tomorrow at 6' },
+    { sender: 'ai', text: 'Review these items:', items: [] },
+  ];
+
+  const updated = setLastMessageId(messages, 'aaaa-bbbb');
+
+  assert.equal(updated[0].id, undefined);
+  assert.equal(updated[1].id, 'aaaa-bbbb');
+  assert.equal(messages[1].id, undefined);
+});
+
+test('leaves an empty chat alone', () => {
+  assert.deepEqual(setLastMessageId([], 'aaaa-bbbb'), []);
 });
