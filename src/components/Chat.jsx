@@ -261,6 +261,7 @@ export default function Chat() {
                   <AiProposalPreview
                     key={`proposal-${itemIndex}`}
                     proposal={item.proposal}
+                    conflicts={item.conflicts}
                     onConfirm={() =>
                       handleConfirm(messageIndex, itemIndex, item.proposal)
                     }

@@ -44,6 +44,7 @@ const ITEM_TYPES = [
 
 export default function AiProposalPreview({
   proposal,
+  conflicts = [],
   onConfirm,
   onEdit,
   onCancel,
@@ -51,6 +52,7 @@ export default function AiProposalPreview({
   isSaved = false,
   actionsDisabled = false,
 }) {
+  const hasConflicts = conflicts.length > 0;
   const dates = [
     { label: 'Starts', value: proposal.startAt },
     { label: 'Ends', value: proposal.endAt },
@@ -68,6 +70,17 @@ export default function AiProposalPreview({
   return (
     <article className="ai-proposal-preview">
       <h3>{proposal.title}</h3>
+
+      {hasConflicts && (
+        <div className="ai-proposal-conflict-warning" role="alert">
+          <p>This overlaps with something already on your calendar:</p>
+          <ul>
+            {conflicts.map((conflict) => (
+              <li key={conflict.id}>{conflict.title}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <dl>
         <div className="ai-proposal-detail">
@@ -118,14 +131,15 @@ export default function AiProposalPreview({
         <p role="status">Saved to calendar.</p>
       ) : (
         <div className="ai-proposal-actions">
-          {/* Confirmation button */}
+          {/* Confirmation button, calls out the conflict if there is one */}
           <button
             type="button"
             onClick={onConfirm}
             disabled={!onConfirm || actionsDisabled}
             aria-label={`Confirm ${proposal.title}`}
+            className={hasConflicts ? 'ai-proposal-confirm-warning' : ''}
           >
-            {isSaving ? 'Saving...' : 'Confirm'}
+            {isSaving ? 'Saving...' : hasConflicts ? 'Confirm anyway' : 'Confirm'}
           </button>
 
           {/* Edit button */}
