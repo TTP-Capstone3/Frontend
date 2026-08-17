@@ -11,6 +11,7 @@ import {
   combineClarificationRequest,
   getAiResponseText,
   hasClarification,
+  hasUnresolvedConflict,
 } from '../utils/aiClarification';
 import AiProposalPreview from './AiProposalPreview';
 import ScheduleItemModal from './ScheduleItemModal';
@@ -218,7 +219,9 @@ export default function Chat() {
         Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
       const result = await requestScheduleProposal(requestMessage, timeZone);
 
-      if (hasClarification(result.items)) {
+      // a conflicting proposal needs the same "reply with more details" flow
+      // as a clarification, so a follow-up like "5 to 5:30 instead" has context
+      if (hasClarification(result.items) || hasUnresolvedConflict(result.items)) {
         setPendingRequest(requestMessage);
       } else {
         setPendingRequest('');
