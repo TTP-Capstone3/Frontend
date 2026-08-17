@@ -17,6 +17,12 @@ function formatDate(dateValue, timeZone, allDay) {
   );
 }
 
+function formatTime(dateValue, timeZone) {
+  return new Intl.DateTimeFormat(undefined, { timeStyle: 'short', timeZone }).format(
+    new Date(dateValue),
+  );
+}
+
 const PRIORITIES = [
   { value: 'none', label: 'No Priority' },
   { value: 'very low', label: 'Very Low' },
@@ -45,9 +51,11 @@ const ITEM_TYPES = [
 export default function AiProposalPreview({
   proposal,
   conflicts = [],
+  freeSlots = [],
   onConfirm,
   onEdit,
   onCancel,
+  onSelectSlot,
   isSaving = false,
   isSaved = false,
   actionsDisabled = false,
@@ -79,6 +87,24 @@ export default function AiProposalPreview({
               <li key={conflict.id}>{conflict.title}</li>
             ))}
           </ul>
+
+          {freeSlots.length > 0 && (
+            <>
+              <p>You're free at:</p>
+              <div className="ai-proposal-slot-suggestions">
+                {freeSlots.map((slot) => (
+                  <button
+                    key={slot.start}
+                    type="button"
+                    onClick={() => onSelectSlot?.(slot)}
+                    disabled={!onSelectSlot || actionsDisabled}
+                  >
+                    {formatTime(slot.start, proposal.timeZone)} – {formatTime(slot.end, proposal.timeZone)}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 

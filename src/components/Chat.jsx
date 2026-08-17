@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
 import { useSchedule } from '../context/ScheduleContext';
 import {
+  applyFreeSlot,
   markProposalSaved,
   removeProposal,
   updateProposal,
@@ -70,6 +71,12 @@ export default function Chat() {
 
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
+  }
+
+  function handleApplySlot(messageIndex, itemIndex, slot) {
+    setMessages((currentMessages) =>
+      applyFreeSlot(currentMessages, messageIndex, itemIndex, slot),
+    );
   }
 
   function handleCancel(messageIndex, itemIndex) {
@@ -262,11 +269,15 @@ export default function Chat() {
                     key={`proposal-${itemIndex}`}
                     proposal={item.proposal}
                     conflicts={item.conflicts}
+                    freeSlots={item.freeSlots}
                     onConfirm={() =>
                       handleConfirm(messageIndex, itemIndex, item.proposal)
                     }
                     onEdit={() =>
                       handleEdit(messageIndex, itemIndex, item.proposal)
+                    }
+                    onSelectSlot={(slot) =>
+                      handleApplySlot(messageIndex, itemIndex, slot)
                     }
                     onCancel={() => handleCancel(messageIndex, itemIndex)}
                     isSaving={savingItem === `${messageIndex}-${itemIndex}`}

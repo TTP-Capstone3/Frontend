@@ -140,6 +140,27 @@
     padding-left: 18px;
 }
 
+.ai-proposal-slot-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.ai-proposal-slot-suggestions button {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--code-bg);
+    color: var(--text-h);
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.ai-proposal-slot-suggestions button:hover {
+    border-color: var(--accent);
+}
+
 .ai-proposal-actions {
     display: flex;
     gap: 8px;
