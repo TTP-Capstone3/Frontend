@@ -39,6 +39,7 @@
     border-radius: 6px;
     border: none;
     background: transparent;
+    color: inherit;
     cursor: pointer;
     line-height: 1;
     font-size: 20px;
