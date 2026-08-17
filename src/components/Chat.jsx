@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { requestScheduleProposal } from '../api/ai';
+import { requestScheduleProposal, requestSpeech } from '../api/ai';
 import {
   loadAiMessages,
   saveAiMessage,
@@ -37,6 +37,14 @@ export default function Chat() {
   const [isListening, setIsListening] = useState(false);
   //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
   const recognitionRef = useRef(null);
+  // true when the message about to be sent came from voice mode, so we know to speak the reply back
+  const voiceReplyRef = useRef(false);
+  const audioRef = useRef(null);
+  // dedicated hands-free "voice mode" panel, separate from the mic button on the text box
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState('idle');
+  const voiceModeActiveRef = useRef(false);
+  const voiceRecognitionRef = useRef(null);
   const [savingItem, setSavingItem] = useState(null);
   const [pendingRequest, setPendingRequest] = useState('');
   const [editingProposal, setEditingProposal] = useState(null);
@@ -193,6 +201,80 @@ export default function Chat() {
     setIsListening(true);
   }
 
+  function exitVoiceMode() {
+    voiceModeActiveRef.current = false;
+
+    try {
+      voiceRecognitionRef.current?.stop();
+    } catch {
+      // already stopped
+    }
+
+    audioRef.current?.pause();
+    setVoiceMode(false);
+    setVoiceStatus('idle');
+  }
+
+  // listens for one turn, then hands off to handleSubmit through voiceReplyRef.
+  // called again after the ai finishes speaking, so the conversation keeps going hands-free.
+  function startVoiceListening() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    // false here on purpose: we want it to stop itself once you pause, that's the "done talking" signal
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    let hadError = false;
+
+    recognition.onresult = (event) => {
+      setMessage(event.results[0][0].transcript.trim());
+    };
+
+    recognition.onerror = (event) => {
+      hadError = true;
+
+      // nobody said anything this round, just keep listening
+      if (event.error === 'no-speech') {
+        return;
+      }
+
+      setError(`Voice input error: ${event.error}`);
+      exitVoiceMode();
+    };
+
+    recognition.onend = () => {
+      if (!voiceModeActiveRef.current) {
+        return;
+      }
+
+      if (hadError) {
+        startVoiceListening();
+        return;
+      }
+
+      voiceReplyRef.current = true;
+      messageInput.current?.form?.requestSubmit();
+    };
+
+    voiceRecognitionRef.current = recognition;
+    setVoiceStatus('listening');
+    recognition.start();
+  }
+
+  function enterVoiceMode() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setError('Voice input is not supported in this browser.');
+      return;
+    }
+
+    setVoiceMode(true);
+    voiceModeActiveRef.current = true;
+    startVoiceListening();
+  }
+
   async function handleSaveProposalEdit(updatedItem) {
     if (!editingProposal) {
       return;
@@ -266,8 +348,42 @@ export default function Chat() {
     }
   }
 
+  async function playReply(text) {
+    if (!text) {
+      if (voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
+      return;
+    }
+
+    try {
+      setVoiceStatus('speaking');
+      const { data, mimeType } = await requestSpeech(text);
+      audioRef.current?.pause();
+      const audio = new Audio(`data:${mimeType};base64,${data}`);
+      audioRef.current = audio;
+
+      // once the ai is done talking, start listening again for the next turn
+      audio.onended = () => {
+        if (voiceModeActiveRef.current) {
+          startVoiceListening();
+        }
+      };
+
+      await audio.play();
+    } catch {
+      // voice playback is a nice-to-have, the text reply already made it to the chat
+      if (voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+
+    const isVoiceReply = voiceReplyRef.current;
+    voiceReplyRef.current = false;
 
     const cleanedMessage = message.trim();
     if (!cleanedMessage || isSending.current || isLoadingHistory) {
@@ -293,6 +409,11 @@ export default function Chat() {
     setIsLoading(true);
     setError('');
     setMessage('');
+
+    if (isVoiceReply) {
+      setVoiceStatus('thinking');
+    }
+
     setMessages((currentMessages) => [
       ...currentMessages,
       { sender: 'user', text: cleanedMessage },
@@ -339,8 +460,16 @@ export default function Chat() {
       } catch (historyError) {
         setError(historyError.message);
       }
+
+      if (isVoiceReply && voiceModeActiveRef.current) {
+        playReply(aiText);
+      }
     } catch (requestError) {
       setError(requestError.message);
+
+      if (isVoiceReply && voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
     } finally {
       isSending.current = false;
       setIsLoading(false);
@@ -357,7 +486,12 @@ export default function Chat() {
   return (
     <>
       <section className="chat-bar">
-        <h2>Chat</h2>
+        <div className="chat-header">
+          <h2>Chat</h2>
+          <button type="button" className="voice-mode-toggle" onClick={enterVoiceMode}>
+            Voice mode
+          </button>
+        </div>
 
         <div className="chat-messages" aria-live="polite">
           {messages.map((chatMessage, messageIndex) => (
@@ -401,7 +535,26 @@ export default function Chat() {
           {error && <p role="alert">{error}</p>}
         </div>
 
-        <form className="chat-compose" onSubmit={handleSubmit}>
+        {voiceMode && (
+          <div className="voice-panel">
+            <div className={`voice-orb voice-orb-${voiceStatus}`} />
+            <p className="voice-status">
+              {voiceStatus === 'listening' && 'Listening...'}
+              {voiceStatus === 'thinking' && 'Thinking...'}
+              {voiceStatus === 'speaking' && 'Speaking...'}
+              {voiceStatus === 'idle' && 'Starting...'}
+            </p>
+            <button type="button" className="voice-panel-end" onClick={exitVoiceMode}>
+              End voice mode
+            </button>
+          </div>
+        )}
+
+        {/* stays mounted (just hidden) in voice mode so the mic loop can still submit it */}
+        <form
+          className={`chat-compose${voiceMode ? ' chat-compose-hidden' : ''}`}
+          onSubmit={handleSubmit}
+        >
           <div className="chat-input-shell">
             <textarea
               ref={messageInput}
