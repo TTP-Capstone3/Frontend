@@ -64,7 +64,7 @@
 }
 
 .chat-message.ai-message p {
-    background: var(--code-bg);
+    background: var(--bg);
     color: var(--text-h);
     border-bottom-left-radius: 4px;
 }
