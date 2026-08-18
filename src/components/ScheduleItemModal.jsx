@@ -153,13 +153,13 @@ function toDateTimeInput(value) {
   return format(new Date(value), "yyyy-MM-dd'T'HH:mm");
 }
 
-export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft }) {
+export default function ScheduleItemModal({ onClose, itemToEdit, onSaveDraft, defaultItemType }) {
   const { addItem, updateItem } = useSchedule();
 
   // Common fields
   const [title, setTitle] = useState(itemToEdit?.title || '');
   const [description, setDescription] = useState(itemToEdit?.description || '');
-  const [itemType, setItemType] = useState(itemToEdit?.itemType || 'task');
+  const [itemType, setItemType] = useState(itemToEdit?.itemType || defaultItemType || 'task');
   const [priority, setPriority] = useState(itemToEdit?.priority || 'none');
 
   // Task fields

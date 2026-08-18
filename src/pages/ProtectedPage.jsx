@@ -18,6 +18,7 @@ const TABS = [
 export default function ProtectedPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null)
+  const [createItemType, setCreateItemType] = useState('task')
   const [activeTab, setActiveTab] = useState('calendar')
   const [filters, setFilters] = useState({search: '', types: [], priorities: []});
 
@@ -47,9 +48,10 @@ export default function ProtectedPage() {
     setFilters({search: '', types: [], priorities: []});
   }
 
-  // Opens the schedule-item modal for adding a new schedule item.
-  function openCreateModal() {
+  // Opens the schedule-item modal; `type` pre-selects the item type (e.g. 'note').
+  function openCreateModal(type = 'task') {
     setEditingItem(null)
+    setCreateItemType(type)
     setIsModalOpen(true)
   }
 
@@ -200,6 +202,7 @@ export default function ProtectedPage() {
       {isModalOpen && (
         <ScheduleItemModal
           itemToEdit={editingItem}
+          defaultItemType={createItemType}
           onClose={closeModal}
         />
       )}
