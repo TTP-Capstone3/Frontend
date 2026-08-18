@@ -206,7 +206,7 @@
   min-width: 0;
 }
 
-/* Small pencil button sitting right next to the title. */
+/* Small pencil button sitting next to the delete button. */
 .organizer-item-edit {
   display: inline-flex;
   flex: 0 0 auto;
@@ -217,7 +217,7 @@
   border-radius: 4px;
   background: none;
   color: currentColor;
-  opacity: 0.5;
+  opacity: 0.80;
   cursor: pointer;
 }
 
@@ -228,7 +228,11 @@
 
 /* Keeps the delete button a fixed size so it can't be squeezed by a long title. */
 .organizer-item-delete {
+  font-size: 20px;
   flex: 0 0 auto;
+  margin-left: 4px;
+  cursor: pointer;
+  opacity: 0.80;
 }
 
 .organizer-filter-controls {
