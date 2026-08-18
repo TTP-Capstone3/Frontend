@@ -45,6 +45,9 @@ export default function Chat() {
   const [voiceStatus, setVoiceStatus] = useState('idle');
   const voiceModeActiveRef = useRef(false);
   const voiceRecognitionRef = useRef(null);
+  // lets voice mode's onresult hand a "confirm"/"cancel" match to onend without a stale closure
+  const voiceCommandRef = useRef(null);
+  const messagesRef = useRef([]);
   const [savingItem, setSavingItem] = useState(null);
   const [pendingRequest, setPendingRequest] = useState('');
   const [editingProposal, setEditingProposal] = useState(null);
@@ -88,6 +91,10 @@ export default function Chat() {
     textarea.style.height = `${Math.max(nextHeight, defaultHeight)}px`;
     textarea.style.overflowY = finalScrollHeight > maxHeight ? 'auto' : 'hidden';
   }, [message]);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Bring the saved conversation back when the chat opens. The cancelled flag
   // keeps the second run React does in development from setting state twice.
@@ -215,6 +222,41 @@ export default function Chat() {
     setVoiceStatus('idle');
   }
 
+  // "say confirm" only makes sense when the last thing the ai said is a single
+  // event/task waiting on you - finds that proposal, or null if it's ambiguous.
+  function findPendingProposal(currentMessages) {
+    const lastMessageIndex = currentMessages.length - 1;
+    const lastMessage = currentMessages[lastMessageIndex];
+
+    if (!lastMessage || lastMessage.sender !== 'ai' || !Array.isArray(lastMessage.items)) {
+      return null;
+    }
+
+    const pendingProposals = lastMessage.items
+      .map((item, itemIndex) => ({ item, itemIndex }))
+      .filter(({ item }) => item.kind === 'proposal' && item.proposal && !item.isSaved);
+
+    if (pendingProposals.length !== 1) {
+      return null;
+    }
+
+    const { item, itemIndex } = pendingProposals[0];
+    return { messageIndex: lastMessageIndex, itemIndex, proposal: item.proposal };
+  }
+
+  const CONFIRM_PHRASES = ['confirm', 'confirm it', 'confirm that', 'yes confirm', 'save it', 'save that'];
+
+  function matchesConfirmCommand(transcript) {
+    return CONFIRM_PHRASES.includes(transcript.toLowerCase().trim());
+  }
+
+  // runs "confirm" hands-free instead of sending it to the ai as a new message
+  async function runConfirmVoiceCommand(pending) {
+    setVoiceStatus('thinking');
+    const saved = await handleConfirm(pending.messageIndex, pending.itemIndex, pending.proposal);
+    playReply(saved ? 'Confirmed, added to your calendar.' : 'Sorry, that did not save. Please try again.');
+  }
+
   // listens for one turn, then hands off to handleSubmit through voiceReplyRef.
   // called again after the ai finishes speaking, so the conversation keeps going hands-free.
   function startVoiceListening() {
@@ -228,7 +270,18 @@ export default function Chat() {
     let hadError = false;
 
     recognition.onresult = (event) => {
-      setMessage(event.results[0][0].transcript.trim());
+      const transcript = event.results[0][0].transcript.trim();
+      const pending = matchesConfirmCommand(transcript)
+        ? findPendingProposal(messagesRef.current)
+        : null;
+
+      if (pending) {
+        voiceCommandRef.current = { type: 'confirm', pending };
+        return;
+      }
+
+      voiceCommandRef.current = null;
+      setMessage(transcript);
     };
 
     recognition.onerror = (event) => {
@@ -250,6 +303,14 @@ export default function Chat() {
 
       if (hadError) {
         startVoiceListening();
+        return;
+      }
+
+      const voiceCommand = voiceCommandRef.current;
+      voiceCommandRef.current = null;
+
+      if (voiceCommand?.type === 'confirm') {
+        runConfirmVoiceCommand(voiceCommand.pending);
         return;
       }
 
@@ -336,12 +397,15 @@ export default function Chat() {
           'Saved to your calendar, but the chat history did not update.',
         );
       }
+
+      return true;
     } catch (saveError) {
       const errorMessage =
         saveError instanceof Error
           ? saveError.message
           : 'Could not save the proposal.';
       setError(errorMessage);
+      return false;
     } finally {
       isSaving.current = false;
       setSavingItem(null);
