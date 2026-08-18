@@ -73,7 +73,7 @@
 @media (min-width: 1202px) {
     .protected-layout {
         gap: 24px;
-        grid-template-columns: 260px 1fr 280px;
+        grid-template-columns: 280px 1fr 280px;
         grid-template-areas: "organizer calendar chat";
         align-items: stretch;
     }

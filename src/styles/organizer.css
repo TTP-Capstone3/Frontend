@@ -1,6 +1,4 @@
-/* Minimal layout only — just enough for the organizer panel to render
-   correctly (form fields in a row, item rows laid out, list markers off).
-   No colors, borders, or other decoration. */
+/* Organizer panel layout, plus folder tabs and item styling. */
 
 .organizer-header {
   display: flex;
@@ -9,15 +7,26 @@
   gap: 8px;
 }
 
-.organizer-header h2 {
-  margin: 0;
+.organizer-add-button {
+  flex: none;
+  margin-right: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 1.1em;
+  line-height: 1;
+  cursor: pointer;
 }
 
-.organizer-add-button {
-  border: none;
-  background: none;
-  color: var(--accent);
-  cursor: pointer;
+.organizer-add-button:hover {
+  filter: brightness(1.08);
 }
 
 .organizer-panel {
@@ -37,10 +46,76 @@
   }
 }
 
+/* Folder tabs double as the panel's title; the active one fuses into .organizer-folder below. */
+.organizer-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.organizer-tab {
+  position: relative;
+  margin-bottom: -2px;
+  padding: 6px 16px;
+  border: 2px solid var(--border);
+  border-radius: 22px 22px 0 0;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85em;
+  cursor: pointer;
+  /* Stands in for the folder's top edge, so the highlight lives here instead. */
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  transition: background 0.15s ease, color 0.15s ease, padding 0.15s ease, font-size 0.15s ease;
+}
+
+.organizer-tab:hover {
+  color: var(--text-h);
+}
+
+.organizer-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.organizer-tab.is-active {
+  position: relative;
+  z-index: 1;
+  padding: 9px 20px;
+  background: var(--bg);
+  color: var(--text-h);
+  border-bottom-color: var(--bg);
+  font-size: 1.05em;
+}
+
+/* The "folder" itself — the tabs above appear to be attached to its top edge. */
+.organizer-folder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  /* Extra left padding keeps the accent stripe and text off the folder's edge. */
+  padding: 10px 14px 10px 20px;
+  border: 2px solid var(--border);
+  border-radius: 0 22px 22px 22px;
+  background: var(--bg);
+  /* Slight 3D lift: outer drop shadow only — the top-edge highlight lives on the tabs instead. */
+  box-shadow:
+    var(--shadow),
+    0 12px 24px rgba(0, 0, 0, 0.16);
+}
+
 .organizer-body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
   /* Keeps the scrollbar from overlapping each item's delete (×) button. */
@@ -77,25 +152,26 @@
   background: rgba(106, 106, 106, 0.097);
 }
 
+/* Notes open a read-only view card on click, hence the pointer cursor. */
+.organizer-item.type-note {
+  cursor: pointer;
+}
+
 /* Left accent stripe colored by item type. */
 .organizer-item.type-event {
   border-left: 4px solid #0f5854;
-
 }
 
 .organizer-item.type-task {
   border-left: 4px solid hsl(214, 70%, 70%);
-
 }
 
 .organizer-item.type-reminder {
   border-left: 4px solid #fab758;
-
 }
 
 .organizer-item.type-note {
   border-left: 4px solid #dda7e3;
-
 }
 
 /* Dimmed once a task is checked off or an event has ended. */
@@ -353,4 +429,49 @@
 
 .organizer-group-finished-sub .organizer-item-list {
   margin-top: 8px;
+}
+
+/* Read-only note card shown in the shared Modal when a note is clicked. */
+.note-view-description {
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+  color: var(--text-h);
+}
+
+.note-view-empty {
+  color: var(--text);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.note-view-date {
+  margin: 0 0 16px;
+  font-size: 0.85em;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.note-view-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.note-view-actions button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+.note-view-actions button:hover {
+  filter: brightness(1.08);
+}
+
+.note-view-actions button:last-child {
+  border-color: #f87171;
+  color: #f87171;
 }
