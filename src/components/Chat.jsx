@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestScheduleProposal } from '../api/ai';
+import {
+  loadAiMessages,
+  saveAiMessage,
+  updateAiMessageItems,
+} from '../api/aiConversation';
 import { useSchedule } from '../context/ScheduleContext';
+import {
+  setLastMessageId,
+  toChatMessages,
+  toSavedItems,
+} from '../utils/aiHistoryMessages';
 import {
   applyFreeSlot,
   markProposalSaved,
@@ -21,6 +31,7 @@ export default function Chat() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState('');
   //start voice input set mic to rest state - Daniel - this state is when the mic is not on and not recieving Audio.
   const [isListening, setIsListening] = useState(false);
@@ -70,6 +81,36 @@ export default function Chat() {
     textarea.style.overflowY = finalScrollHeight > maxHeight ? 'auto' : 'hidden';
   }, [message]);
 
+  // Bring the saved conversation back when the chat opens. The cancelled flag
+  // keeps the second run React does in development from setting state twice.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHistory() {
+      try {
+        const savedMessages = await loadAiMessages();
+
+        if (!cancelled) {
+          setMessages(toChatMessages(savedMessages));
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError.message);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingHistory(false);
+        }
+      }
+    }
+
+    loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
   }
@@ -80,11 +121,29 @@ export default function Chat() {
     );
   }
 
-  function handleCancel(messageIndex, itemIndex) {
-    setMessages((currentMessages) =>
-      removeProposal(currentMessages, messageIndex, itemIndex),
-    );
+  // Keeps the saved copy of an AI message in step with what the chat shows, so
+  // the same proposals come back after a refresh.
+  async function syncMessageItems(updatedMessages, messageIndex) {
+    const savedMessage = updatedMessages[messageIndex];
+
+    if (!savedMessage || !savedMessage.id) {
+      return;
+    }
+
+    await updateAiMessageItems(savedMessage.id, toSavedItems(savedMessage.items));
+  }
+
+  async function handleCancel(messageIndex, itemIndex) {
+    const updatedMessages = removeProposal(messages, messageIndex, itemIndex);
+
+    setMessages(updatedMessages);
     setPendingRequest('');
+
+    try {
+      await syncMessageItems(updatedMessages, messageIndex);
+    } catch (historyError) {
+      setError(historyError.message);
+    }
   }
 
   // this function will turn the mic on and off.
@@ -147,10 +206,21 @@ export default function Chat() {
       allDay: proposal.allDay ?? false,
     };
 
-    setMessages((currentMessages) =>
-      updateProposal(currentMessages, messageIndex, itemIndex, updatedProposal),
+    const updatedMessages = updateProposal(
+      messages,
+      messageIndex,
+      itemIndex,
+      updatedProposal,
     );
+
+    setMessages(updatedMessages);
     setEditingProposal(null);
+
+    try {
+      await syncMessageItems(updatedMessages, messageIndex);
+    } catch (historyError) {
+      setError(historyError.message);
+    }
   }
 
   async function handleConfirm(messageIndex, itemIndex, proposal) {
@@ -166,10 +236,24 @@ export default function Chat() {
     try {
       await addItem(proposal);
 
-      setMessages((currentMessages) =>
-        markProposalSaved(currentMessages, messageIndex, itemIndex),
+      // Mark it saved before touching history so a second click cannot add the
+      // same item to the calendar twice.
+      const updatedMessages = markProposalSaved(
+        messages,
+        messageIndex,
+        itemIndex,
       );
+
+      setMessages(updatedMessages);
       setPendingRequest('');
+
+      try {
+        await syncMessageItems(updatedMessages, messageIndex);
+      } catch {
+        setError(
+          'Saved to your calendar, but the chat history did not update.',
+        );
+      }
     } catch (saveError) {
       const errorMessage =
         saveError instanceof Error
@@ -186,7 +270,7 @@ export default function Chat() {
     event.preventDefault();
 
     const cleanedMessage = message.trim();
-    if (!cleanedMessage || isSending.current) {
+    if (!cleanedMessage || isSending.current || isLoadingHistory) {
       return;
     }
 
@@ -227,14 +311,34 @@ export default function Chat() {
         setPendingRequest('');
       }
 
+      const aiText = getAiResponseText(result.items);
+
       setMessages((currentMessages) => [
         ...currentMessages,
         {
           sender: 'ai',
-          text: getAiResponseText(result.items),
+          text: aiText,
           items: result.items,
         },
       ]);
+
+      // Save only after Gemini replied, so a failed request is never stored and
+      // the backend does not see this prompt twice when it builds context.
+      try {
+        await saveAiMessage({ sender: 'user', text: cleanedMessage });
+
+        const savedAiMessage = await saveAiMessage({
+          sender: 'ai',
+          text: aiText,
+          items: toSavedItems(result.items),
+        });
+
+        setMessages((currentMessages) =>
+          setLastMessageId(currentMessages, savedAiMessage.id),
+        );
+      } catch (historyError) {
+        setError(historyError.message);
+      }
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -292,6 +396,7 @@ export default function Chat() {
             </div>
           ))}
 
+          {isLoadingHistory && <p role="status">Loading your chat...</p>}
           {isLoading && <p role="status">Thinking...</p>}
           {error && <p role="alert">{error}</p>}
         </div>
