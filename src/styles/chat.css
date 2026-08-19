@@ -322,11 +322,6 @@
     opacity: 0.6;
 }
 
-.voice-orb-speaking {
-    opacity: 1;
-    animation: voice-pulse 0.6s ease-in-out infinite;
-}
-
 @keyframes voice-pulse {
 
     0%,

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   requestDailyBriefing,
   requestScheduleProposal,
-  requestSpeech,
 } from '../api/ai';
 import {
   loadAiMessages,
@@ -43,9 +42,8 @@ export default function Chat() {
   const [isListening, setIsListening] = useState(false);
   //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
   const recognitionRef = useRef(null);
-  // true when the message about to be sent came from voice mode, so we know to speak the reply back
+  // true when the message about to be sent came from voice mode, so we know to keep listening after the reply
   const voiceReplyRef = useRef(false);
-  const audioRef = useRef(null);
   // dedicated hands-free "voice mode" panel, separate from the mic button on the text box
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState('idle');
@@ -254,7 +252,6 @@ export default function Chat() {
       // already stopped
     }
 
-    audioRef.current?.pause();
     setVoiceMode(false);
     setVoiceStatus('idle');
   }
@@ -301,15 +298,21 @@ export default function Chat() {
   // runs "confirm" hands-free instead of sending it to the ai as a new message
   async function runConfirmVoiceCommand(pending) {
     setVoiceStatus('thinking');
-    const saved = await handleConfirm(pending.messageIndex, pending.itemIndex, pending.proposal);
-    playReply(saved ? 'Confirmed, added to your calendar.' : 'Sorry, that did not save. Please try again.');
+    await handleConfirm(pending.messageIndex, pending.itemIndex, pending.proposal);
+
+    if (voiceModeActiveRef.current) {
+      startVoiceListening();
+    }
   }
 
   // runs "cancel" hands-free instead of sending it to the ai as a new message
   async function runCancelVoiceCommand(pending) {
     setVoiceStatus('thinking');
     await handleCancel(pending.messageIndex, pending.itemIndex);
-    playReply('Cancelled.');
+
+    if (voiceModeActiveRef.current) {
+      startVoiceListening();
+    }
   }
 
   // "edit" opens the same edit form the button does, which needs typing, so
@@ -494,37 +497,6 @@ export default function Chat() {
     }
   }
 
-  async function playReply(text) {
-    if (!text) {
-      if (voiceModeActiveRef.current) {
-        startVoiceListening();
-      }
-      return;
-    }
-
-    try {
-      setVoiceStatus('speaking');
-      const { data, mimeType } = await requestSpeech(text);
-      audioRef.current?.pause();
-      const audio = new Audio(`data:${mimeType};base64,${data}`);
-      audioRef.current = audio;
-
-      // once the ai is done talking, start listening again for the next turn
-      audio.onended = () => {
-        if (voiceModeActiveRef.current) {
-          startVoiceListening();
-        }
-      };
-
-      await audio.play();
-    } catch {
-      // voice playback is a nice-to-have, the text reply already made it to the chat
-      if (voiceModeActiveRef.current) {
-        startVoiceListening();
-      }
-    }
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -607,8 +579,9 @@ export default function Chat() {
         setError(historyError.message);
       }
 
+      // reply is shown in the chat as text - just keep listening for the next turn
       if (isVoiceReply && voiceModeActiveRef.current) {
-        playReply(aiText);
+        startVoiceListening();
       }
     } catch (requestError) {
       setError(requestError.message);
@@ -718,7 +691,6 @@ export default function Chat() {
             <p className="voice-status">
               {voiceStatus === 'listening' && 'Listening...'}
               {voiceStatus === 'thinking' && 'Thinking...'}
-              {voiceStatus === 'speaking' && 'Speaking...'}
               {voiceStatus === 'idle' && 'Starting...'}
             </p>
             <button type="button" className="voice-panel-end" onClick={exitVoiceMode}>
