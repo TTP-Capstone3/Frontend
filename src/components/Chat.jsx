@@ -244,10 +244,19 @@ export default function Chat() {
     return { messageIndex: lastMessageIndex, itemIndex, proposal: item.proposal };
   }
 
-  const CONFIRM_PHRASES = ['confirm', 'confirm it', 'confirm that', 'yes confirm', 'save it', 'save that'];
+  const VOICE_COMMAND_PHRASES = {
+    confirm: ['confirm', 'confirm it', 'confirm that', 'yes confirm', 'save it', 'save that'],
+    cancel: ['cancel', 'cancel it', 'cancel that', 'delete', 'delete it', 'delete that', 'no cancel'],
+    edit: ['edit', 'edit it', 'edit that', 'change it', 'change that'],
+  };
 
-  function matchesConfirmCommand(transcript) {
-    return CONFIRM_PHRASES.includes(transcript.toLowerCase().trim());
+  function matchVoiceCommand(transcript) {
+    const cleaned = transcript.toLowerCase().trim();
+    return (
+      Object.keys(VOICE_COMMAND_PHRASES).find((command) =>
+        VOICE_COMMAND_PHRASES[command].includes(cleaned),
+      ) || null
+    );
   }
 
   // runs "confirm" hands-free instead of sending it to the ai as a new message
@@ -255,6 +264,20 @@ export default function Chat() {
     setVoiceStatus('thinking');
     const saved = await handleConfirm(pending.messageIndex, pending.itemIndex, pending.proposal);
     playReply(saved ? 'Confirmed, added to your calendar.' : 'Sorry, that did not save. Please try again.');
+  }
+
+  // runs "cancel" hands-free instead of sending it to the ai as a new message
+  async function runCancelVoiceCommand(pending) {
+    setVoiceStatus('thinking');
+    await handleCancel(pending.messageIndex, pending.itemIndex);
+    playReply('Cancelled.');
+  }
+
+  // "edit" opens the same edit form the button does, which needs typing, so
+  // voice mode steps aside instead of trying to keep listening through it.
+  function runEditVoiceCommand(pending) {
+    handleEdit(pending.messageIndex, pending.itemIndex, pending.proposal);
+    exitVoiceMode();
   }
 
   // listens for one turn, then hands off to handleSubmit through voiceReplyRef.
@@ -271,12 +294,11 @@ export default function Chat() {
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript.trim();
-      const pending = matchesConfirmCommand(transcript)
-        ? findPendingProposal(messagesRef.current)
-        : null;
+      const command = matchVoiceCommand(transcript);
+      const pending = command ? findPendingProposal(messagesRef.current) : null;
 
-      if (pending) {
-        voiceCommandRef.current = { type: 'confirm', pending };
+      if (command && pending) {
+        voiceCommandRef.current = { type: command, pending };
         return;
       }
 
@@ -311,6 +333,16 @@ export default function Chat() {
 
       if (voiceCommand?.type === 'confirm') {
         runConfirmVoiceCommand(voiceCommand.pending);
+        return;
+      }
+
+      if (voiceCommand?.type === 'cancel') {
+        runCancelVoiceCommand(voiceCommand.pending);
+        return;
+      }
+
+      if (voiceCommand?.type === 'edit') {
+        runEditVoiceCommand(voiceCommand.pending);
         return;
       }
 
