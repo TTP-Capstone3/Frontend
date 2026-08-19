@@ -629,9 +629,23 @@ export default function Chat() {
       <section className="chat-bar">
         <div className="chat-header">
           <h2>Chat</h2>
-          <button type="button" className="voice-mode-toggle" onClick={enterVoiceMode}>
-            Voice mode
-          </button>
+          <div className="inline-flex items-center gap-2">
+            <button
+              type="button"
+              className="voice-mode-toggle whitespace-nowrap"
+              onClick={handleDailyBrief}
+              disabled={isBriefing || isLoadingHistory}
+            >
+              {isBriefing ? 'Loading...' : 'Daily brief'}
+            </button>
+            <button
+              type="button"
+              className="voice-mode-toggle whitespace-nowrap"
+              onClick={enterVoiceMode}
+            >
+              Voice mode
+            </button>
+          </div>
         </div>
 
         <div className="chat-messages" aria-live="polite">
@@ -696,14 +710,6 @@ export default function Chat() {
           className={`chat-compose${voiceMode ? ' chat-compose-hidden' : ''}`}
           onSubmit={handleSubmit}
         >
-          <button
-            type="button"
-            onClick={handleDailyBrief}
-            disabled={isBriefing || isLoadingHistory}
-          >
-            {isBriefing ? 'Getting your brief...' : 'Daily brief'}
-          </button>
-
           <div className="chat-input-shell">
             <textarea
               ref={messageInput}
