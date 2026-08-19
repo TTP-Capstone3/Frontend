@@ -1,3 +1,5 @@
+import { format, isValid, parseISO } from 'date-fns';
+
 // Turn a daily briefing into the plain text saved as a note. The briefing also
 // carries a headline per section, which the note does not need.
 export function toBriefingText(briefing) {
@@ -23,5 +25,14 @@ export function toBriefingText(briefing) {
 // Notes are easier to find later when the date is in the title.
 export function toBriefingTitle(briefing) {
   const date = briefing?.date;
-  return typeof date === 'string' && date ? `Daily brief ${date}` : 'Daily brief';
+  if (typeof date !== 'string' || !date) {
+    return 'Daily Brief';
+  }
+
+  const parsedDate = parseISO(date);
+  if (!isValid(parsedDate)) {
+    return 'Daily Brief';
+  }
+
+  return `Daily Brief: ${format(parsedDate, 'MMMM do yyyy')}`;
 }
