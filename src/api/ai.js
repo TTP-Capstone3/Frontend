@@ -34,3 +34,30 @@ export async function requestScheduleProposal(message, timeZone) {
 
   return result;
 }
+
+export async function requestSpeech(text) {
+  let response;
+
+  try {
+    response = await fetch(`${BASE_URL}/ai/speak`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+  } catch {
+    throw new Error('Could not connect to the AI service. Please try again.');
+  }
+
+  if (!response.ok) {
+    throw new Error('The AI could not generate speech right now.');
+  }
+
+  const result = await response.json().catch(() => null);
+
+  if (!result || typeof result.data !== 'string' || typeof result.mimeType !== 'string') {
+    throw new Error('The AI returned an unexpected response. Please try again.');
+  }
+
+  return result;
+}
