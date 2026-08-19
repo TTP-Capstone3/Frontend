@@ -357,7 +357,7 @@ export default function Chat() {
   return (
     <>
       <section className="chat-bar">
-        <h2>AI Assistant</h2>
+        <h2>Chat</h2>
 
         <div className="chat-messages" aria-live="polite">
           {messages.map((chatMessage, messageIndex) => (
