@@ -632,6 +632,7 @@ export default function Chat() {
   return (
     <>
       <section className="chat-bar">
+        <h2>AI Assistant</h2>
         <div className="chat-header">
           <h2>Chat</h2>
           <div className="inline-flex items-center gap-2">

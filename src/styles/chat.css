@@ -4,11 +4,15 @@
     gap: 8px;
     box-sizing: border-box;
     padding: 16px;
-    border: 1px solid var(--border);
     border-radius: 8px;
     background: rgba(106, 106, 106, 0.097);
-    height: 80vh;
-    min-height: 500px;
+    height: 83vh;
+    min-height: 560px;
+}
+
+.chat-bar>h2 {
+    text-align: center;
+    margin: 0;
 }
 
 @media (max-width: 480px) {
@@ -24,6 +28,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    /* Push the scrollbar out into the panel's own padding so it rides flush against the right edge instead of sitting inset with the messages. */
+    margin-right: 0px;
+    padding-right: 16px;
 }
 
 .chat-message {
@@ -321,9 +328,12 @@
 }
 
 @keyframes voice-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.15);
     }

@@ -148,17 +148,6 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
               <span className={`priority-dot priority-dot-${priorityClass}`} aria-hidden="true" />
             )}
             <span className="organizer-item-title-text">{item.title}</span>
-            <button
-              type="button"
-              className="organizer-item-edit"
-              onClick={(event) => {
-                event.stopPropagation();
-                onEditItem(item);
-              }}
-              aria-label={`Edit "${item.title}"`}
-            >
-              <EditIcon />
-            </button>
           </span>
           {itemDate(item) && (
             <span className="organizer-item-date">
@@ -166,6 +155,17 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
             </span>
           )}
         </div>
+        <button
+          type="button"
+          className="organizer-item-edit"
+          onClick={(event) => {
+            event.stopPropagation();
+            onEditItem(item);
+          }}
+          aria-label={`Edit "${item.title}"`}
+        >
+          <EditIcon />
+        </button>
         <button
           type="button"
           className="organizer-item-delete"

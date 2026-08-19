@@ -20,7 +20,9 @@ export default function ProtectedPage() {
   const [editingItem, setEditingItem] = useState(null)
   const [createItemType, setCreateItemType] = useState('task')
   const [activeTab, setActiveTab] = useState('calendar')
-  const [filters, setFilters] = useState({search: '', types: [], priorities: []});
+  const [filters, setFilters] = useState({ search: '', types: [], priorities: [] });
+  const [isOrganizerOpen, setIsOrganizerOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   const fileInputRef = useRef(null)
   const { scheduleItems, refreshItems } = useSchedule()
@@ -30,7 +32,7 @@ export default function ProtectedPage() {
   const [icsMessage, setIcsMessage] = useState(null)
 
   function handleSearchChange(value) {
-    setFilters((filters) => ({...filters, search: value}));
+    setFilters((filters) => ({ ...filters, search: value }));
   }
 
   function handleToggleFilter(name, value) {
@@ -40,12 +42,12 @@ export default function ProtectedPage() {
         ? selected.filter((selectedValue) => selectedValue !== value)
         : [...selected, value];
 
-      return {...filters, [name]: newValues};
+      return { ...filters, [name]: newValues };
     });
   }
 
   function clearFilters() {
-    setFilters({search: '', types: [], priorities: []});
+    setFilters({ search: '', types: [], priorities: [] });
   }
 
   // Opens the schedule-item modal; `type` pre-selects the item type (e.g. 'note').
@@ -60,13 +62,13 @@ export default function ProtectedPage() {
     setEditingItem(item)
     setIsModalOpen(true)
   }
-  
+
   // Closes the modal.
   function closeModal() {
     setEditingItem(null)
     setIsModalOpen(false)
   }
-  
+
   async function handleImport(event) {
     const input = event.target;
     const file = input.files?.[0];
@@ -126,7 +128,7 @@ export default function ProtectedPage() {
   });
 
   const icsToolbar = (
-    <div className="ics-toolbar">
+    <div className="ics-toolbar ics-toolbar-hover">
       {/* Import Button */}
       <input className="ics-toolbar-button"
         ref={fileInputRef}
@@ -166,15 +168,32 @@ export default function ProtectedPage() {
   return (
     <>
       <section className="protected-layout" data-active-tab={activeTab}>
-        <Organizer
-          scheduleItems={filteredItems}
-          filters={filters}
-          onSearchChange={handleSearchChange}
-          onToggleFilter={handleToggleFilter}
-          onClearFilters={clearFilters}
-          onAddItem={openCreateModal}
-          onEditItem={openEditModal}
-        />
+        <div className={`side-panel-wrap organizer-panel-wrap${isOrganizerOpen ? '' : ' is-closed'}`}>
+          <div className="side-panel" id="organizer-slide">
+            <div className="side-panel-content">
+              <Organizer
+                scheduleItems={filteredItems}
+                filters={filters}
+                onSearchChange={handleSearchChange}
+                onToggleFilter={handleToggleFilter}
+                onClearFilters={clearFilters}
+                onAddItem={openCreateModal}
+                onEditItem={openEditModal}
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            className="side-panel-toggle"
+            onClick={() => setIsOrganizerOpen((open) => !open)}
+            aria-expanded={isOrganizerOpen}
+            aria-controls="organizer-slide"
+            aria-label={isOrganizerOpen ? 'Collapse organizer' : 'Expand organizer'}
+          >
+            <span className="side-panel-toggle-label">Organizer</span>
+            <span className="side-panel-toggle-icon" aria-hidden="true">{isOrganizerOpen ? '‹' : '›'}</span>
+          </button>
+        </div>
 
         <MyCalendar
           scheduleItems={filteredItems}
@@ -182,7 +201,24 @@ export default function ProtectedPage() {
           toolbar={icsToolbar}
         />
 
-        <Chat />
+        <div className={`side-panel-wrap chat-panel-wrap${isChatOpen ? '' : ' is-closed'}`}>
+          <button
+            type="button"
+            className="side-panel-toggle"
+            onClick={() => setIsChatOpen((open) => !open)}
+            aria-expanded={isChatOpen}
+            aria-controls="chat-slide"
+            aria-label={isChatOpen ? 'Collapse chat' : 'Expand chat'}
+          >
+            <span className="side-panel-toggle-label">Chat</span>
+            <span className="side-panel-toggle-icon" aria-hidden="true">{isChatOpen ? '›' : '‹'}</span>
+          </button>
+          <div className="side-panel" id="chat-slide">
+            <div className="side-panel-content">
+              <Chat />
+            </div>
+          </div>
+        </div>
       </section>
 
       <nav className="bottom-nav" aria-label="Panel navigation">
