@@ -3,7 +3,7 @@
 //
 // Pass animated when the AI is busy: the three dots pulse in sequence. The
 // animation is skipped for anyone who has asked for reduced motion.
-export default function AgentaMark({ size = 24, animated = false }) {
+export default function AgentaMark({ size = 28, animated = false }) {
   const dotClass = animated ? 'agenta-dot' : '';
 
   return (
