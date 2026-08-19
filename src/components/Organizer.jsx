@@ -67,7 +67,7 @@ function EditIcon() {
   );
 }
 
-export default function Organizer({ scheduleItems, filters, onSearchChange, onToggleFilter, onClearFilters, onAddItem, onEditItem, toolbar }) {
+export default function Organizer({ scheduleItems, filters, onSearchChange, onToggleFilter, onClearFilters, onAddItem, onEditItem }) {
   const { isLoading, error, updateItem, removeItem } = useSchedule();
   const [activeSection, setActiveSection] = useState('organizer');
   const activeTab = TABS.find((tab) => tab.key === activeSection);
@@ -183,8 +183,6 @@ export default function Organizer({ scheduleItems, filters, onSearchChange, onTo
 
   return (
     <aside className="organizer-panel">
-      {toolbar}
-
       <div className="organizer-header">
         <div className="organizer-tabs" role="tablist" aria-label="Organizer sections">
           {TABS.map((tab) => (
