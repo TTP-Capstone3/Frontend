@@ -248,6 +248,8 @@ export default function Chat() {
     confirm: ['confirm', 'confirm it', 'confirm that', 'yes confirm', 'save it', 'save that'],
     cancel: ['cancel', 'cancel it', 'cancel that', 'delete', 'delete it', 'delete that', 'no cancel'],
     edit: ['edit', 'edit it', 'edit that', 'change it', 'change that'],
+    // does not need a pending proposal to work, unlike the three above
+    exit: ['exit', 'exit voice mode', 'stop', 'stop voice mode', 'end voice mode'],
   };
 
   function matchVoiceCommand(transcript) {
@@ -295,6 +297,12 @@ export default function Chat() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript.trim();
       const command = matchVoiceCommand(transcript);
+
+      if (command === 'exit') {
+        voiceCommandRef.current = { type: 'exit' };
+        return;
+      }
+
       const pending = command ? findPendingProposal(messagesRef.current) : null;
 
       if (command && pending) {
@@ -330,6 +338,11 @@ export default function Chat() {
 
       const voiceCommand = voiceCommandRef.current;
       voiceCommandRef.current = null;
+
+      if (voiceCommand?.type === 'exit') {
+        exitVoiceMode();
+        return;
+      }
 
       if (voiceCommand?.type === 'confirm') {
         runConfirmVoiceCommand(voiceCommand.pending);
