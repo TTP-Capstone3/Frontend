@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
+import AgentaLockup from './AgentaLockup';
 
 // NavLink is like an <a> tag but for client-side routing: it navigates without
 // a full page reload, and it tells us when its route is active so we can style it.
@@ -38,8 +39,9 @@ export default function Navbar({ user, onLogout }) {
           <NavLink
             to='/'
             className='mr-2 text-lg font-semibold text-(--text-h)'
+            aria-label='agenta home'
           >
-            Calendar
+            <AgentaLockup animated />
           </NavLink>
 
           {/* `end` makes "Home" active only on "/" exactly, not on every route. */}

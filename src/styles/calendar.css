@@ -107,6 +107,21 @@
     padding: 6px 4px;
     font-size: 12px;
   }
+
+}
+
+/* When the app enters its single-panel responsive layout. */
+@media (max-width: 1200px) {
+  .calendar-actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .calendar-actions .ics-toolbar {
+    justify-content: center;
+  }
 }
 
 .calendar-panel .rbc-event {

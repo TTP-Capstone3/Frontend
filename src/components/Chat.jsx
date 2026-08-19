@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { requestScheduleProposal } from '../api/ai';
+import {
+  requestDailyBriefing,
+  requestScheduleProposal,
+  requestSpeech,
+} from '../api/ai';
 import {
   loadAiMessages,
   saveAiMessage,
@@ -23,6 +27,8 @@ import {
   hasClarification,
   hasUnresolvedConflict,
 } from '../utils/aiClarification';
+import AgentaMark from './AgentaMark';
+import DailyBriefModal from './DailyBriefModal';
 import AiProposalPreview from './AiProposalPreview';
 import ScheduleItemModal from './ScheduleItemModal';
 import '../styles/chat.css';
@@ -37,9 +43,22 @@ export default function Chat() {
   const [isListening, setIsListening] = useState(false);
   //SpeechRecognition Object, we're going to use this to have it not re-render everytime.
   const recognitionRef = useRef(null);
+  // true when the message about to be sent came from voice mode, so we know to speak the reply back
+  const voiceReplyRef = useRef(false);
+  const audioRef = useRef(null);
+  // dedicated hands-free "voice mode" panel, separate from the mic button on the text box
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState('idle');
+  const voiceModeActiveRef = useRef(false);
+  const voiceRecognitionRef = useRef(null);
+  // lets voice mode's onresult hand a "confirm"/"cancel" match to onend without a stale closure
+  const voiceCommandRef = useRef(null);
+  const messagesRef = useRef([]);
   const [savingItem, setSavingItem] = useState(null);
   const [pendingRequest, setPendingRequest] = useState('');
   const [editingProposal, setEditingProposal] = useState(null);
+  const [briefing, setBriefing] = useState(null);
+  const [isBriefing, setIsBriefing] = useState(false);
   const { addItem } = useSchedule();
   const isSending = useRef(false);
   const isSaving = useRef(false);
@@ -81,6 +100,10 @@ export default function Chat() {
     textarea.style.overflowY = finalScrollHeight > maxHeight ? 'auto' : 'hidden';
   }, [message]);
 
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   // Bring the saved conversation back when the chat opens. The cancelled flag
   // keeps the second run React does in development from setting state twice.
   useEffect(() => {
@@ -110,6 +133,31 @@ export default function Chat() {
       cancelled = true;
     };
   }, []);
+
+  // Ask the backend to summarize today's schedule and show it in a modal.
+  async function handleDailyBrief() {
+    if (isBriefing) {
+      return;
+    }
+
+    setIsBriefing(true);
+    setError('');
+
+    try {
+      const timeZone =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      setBriefing(await requestDailyBriefing(timeZone));
+    } catch (briefingError) {
+      setError(briefingError.message);
+    } finally {
+      setIsBriefing(false);
+    }
+  }
+
+  // Keeps the brief as a note so it is still there after the modal closes.
+  async function handleSaveBriefNote(title, description) {
+    await addItem({ itemType: 'note', title, description });
+  }
 
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
@@ -193,6 +241,179 @@ export default function Chat() {
     setIsListening(true);
   }
 
+  function exitVoiceMode() {
+    voiceModeActiveRef.current = false;
+
+    try {
+      voiceRecognitionRef.current?.stop();
+    } catch {
+      // already stopped
+    }
+
+    audioRef.current?.pause();
+    setVoiceMode(false);
+    setVoiceStatus('idle');
+  }
+
+  // "say confirm" only makes sense when the last thing the ai said is a single
+  // event/task waiting on you - finds that proposal, or null if it's ambiguous.
+  function findPendingProposal(currentMessages) {
+    const lastMessageIndex = currentMessages.length - 1;
+    const lastMessage = currentMessages[lastMessageIndex];
+
+    if (!lastMessage || lastMessage.sender !== 'ai' || !Array.isArray(lastMessage.items)) {
+      return null;
+    }
+
+    const pendingProposals = lastMessage.items
+      .map((item, itemIndex) => ({ item, itemIndex }))
+      .filter(({ item }) => item.kind === 'proposal' && item.proposal && !item.isSaved);
+
+    if (pendingProposals.length !== 1) {
+      return null;
+    }
+
+    const { item, itemIndex } = pendingProposals[0];
+    return { messageIndex: lastMessageIndex, itemIndex, proposal: item.proposal };
+  }
+
+  const VOICE_COMMAND_PHRASES = {
+    confirm: ['confirm', 'confirm it', 'confirm that', 'yes confirm', 'save it', 'save that'],
+    cancel: ['cancel', 'cancel it', 'cancel that', 'delete', 'delete it', 'delete that', 'no cancel'],
+    edit: ['edit', 'edit it', 'edit that', 'change it', 'change that'],
+    // does not need a pending proposal to work, unlike the three above
+    exit: ['exit', 'exit voice mode', 'stop', 'stop voice mode', 'end voice mode'],
+  };
+
+  function matchVoiceCommand(transcript) {
+    const cleaned = transcript.toLowerCase().trim();
+    return (
+      Object.keys(VOICE_COMMAND_PHRASES).find((command) =>
+        VOICE_COMMAND_PHRASES[command].includes(cleaned),
+      ) || null
+    );
+  }
+
+  // runs "confirm" hands-free instead of sending it to the ai as a new message
+  async function runConfirmVoiceCommand(pending) {
+    setVoiceStatus('thinking');
+    const saved = await handleConfirm(pending.messageIndex, pending.itemIndex, pending.proposal);
+    playReply(saved ? 'Confirmed, added to your calendar.' : 'Sorry, that did not save. Please try again.');
+  }
+
+  // runs "cancel" hands-free instead of sending it to the ai as a new message
+  async function runCancelVoiceCommand(pending) {
+    setVoiceStatus('thinking');
+    await handleCancel(pending.messageIndex, pending.itemIndex);
+    playReply('Cancelled.');
+  }
+
+  // "edit" opens the same edit form the button does, which needs typing, so
+  // voice mode steps aside instead of trying to keep listening through it.
+  function runEditVoiceCommand(pending) {
+    handleEdit(pending.messageIndex, pending.itemIndex, pending.proposal);
+    exitVoiceMode();
+  }
+
+  // listens for one turn, then hands off to handleSubmit through voiceReplyRef.
+  // called again after the ai finishes speaking, so the conversation keeps going hands-free.
+  function startVoiceListening() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    // false here on purpose: we want it to stop itself once you pause, that's the "done talking" signal
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    let hadError = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.trim();
+      const command = matchVoiceCommand(transcript);
+
+      if (command === 'exit') {
+        voiceCommandRef.current = { type: 'exit' };
+        return;
+      }
+
+      const pending = command ? findPendingProposal(messagesRef.current) : null;
+
+      if (command && pending) {
+        voiceCommandRef.current = { type: command, pending };
+        return;
+      }
+
+      voiceCommandRef.current = null;
+      setMessage(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      hadError = true;
+
+      // nobody said anything this round, just keep listening
+      if (event.error === 'no-speech') {
+        return;
+      }
+
+      setError(`Voice input error: ${event.error}`);
+      exitVoiceMode();
+    };
+
+    recognition.onend = () => {
+      if (!voiceModeActiveRef.current) {
+        return;
+      }
+
+      if (hadError) {
+        startVoiceListening();
+        return;
+      }
+
+      const voiceCommand = voiceCommandRef.current;
+      voiceCommandRef.current = null;
+
+      if (voiceCommand?.type === 'exit') {
+        exitVoiceMode();
+        return;
+      }
+
+      if (voiceCommand?.type === 'confirm') {
+        runConfirmVoiceCommand(voiceCommand.pending);
+        return;
+      }
+
+      if (voiceCommand?.type === 'cancel') {
+        runCancelVoiceCommand(voiceCommand.pending);
+        return;
+      }
+
+      if (voiceCommand?.type === 'edit') {
+        runEditVoiceCommand(voiceCommand.pending);
+        return;
+      }
+
+      voiceReplyRef.current = true;
+      messageInput.current?.form?.requestSubmit();
+    };
+
+    voiceRecognitionRef.current = recognition;
+    setVoiceStatus('listening');
+    recognition.start();
+  }
+
+  function enterVoiceMode() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setError('Voice input is not supported in this browser.');
+      return;
+    }
+
+    setVoiceMode(true);
+    voiceModeActiveRef.current = true;
+    startVoiceListening();
+  }
+
   async function handleSaveProposalEdit(updatedItem) {
     if (!editingProposal) {
       return;
@@ -254,20 +475,57 @@ export default function Chat() {
           'Saved to your calendar, but the chat history did not update.',
         );
       }
+
+      return true;
     } catch (saveError) {
       const errorMessage =
         saveError instanceof Error
           ? saveError.message
           : 'Could not save the proposal.';
       setError(errorMessage);
+      return false;
     } finally {
       isSaving.current = false;
       setSavingItem(null);
     }
   }
 
+  async function playReply(text) {
+    if (!text) {
+      if (voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
+      return;
+    }
+
+    try {
+      setVoiceStatus('speaking');
+      const { data, mimeType } = await requestSpeech(text);
+      audioRef.current?.pause();
+      const audio = new Audio(`data:${mimeType};base64,${data}`);
+      audioRef.current = audio;
+
+      // once the ai is done talking, start listening again for the next turn
+      audio.onended = () => {
+        if (voiceModeActiveRef.current) {
+          startVoiceListening();
+        }
+      };
+
+      await audio.play();
+    } catch {
+      // voice playback is a nice-to-have, the text reply already made it to the chat
+      if (voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+
+    const isVoiceReply = voiceReplyRef.current;
+    voiceReplyRef.current = false;
 
     const cleanedMessage = message.trim();
     if (!cleanedMessage || isSending.current || isLoadingHistory) {
@@ -293,6 +551,11 @@ export default function Chat() {
     setIsLoading(true);
     setError('');
     setMessage('');
+
+    if (isVoiceReply) {
+      setVoiceStatus('thinking');
+    }
+
     setMessages((currentMessages) => [
       ...currentMessages,
       { sender: 'user', text: cleanedMessage },
@@ -339,8 +602,16 @@ export default function Chat() {
       } catch (historyError) {
         setError(historyError.message);
       }
+
+      if (isVoiceReply && voiceModeActiveRef.current) {
+        playReply(aiText);
+      }
     } catch (requestError) {
       setError(requestError.message);
+
+      if (isVoiceReply && voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
     } finally {
       isSending.current = false;
       setIsLoading(false);
@@ -358,6 +629,26 @@ export default function Chat() {
     <>
       <section className="chat-bar">
         <h2>AI Assistant</h2>
+        <div className="chat-header">
+          <h2>Chat</h2>
+          <div className="inline-flex items-center gap-2">
+            <button
+              type="button"
+              className="voice-mode-toggle whitespace-nowrap"
+              onClick={handleDailyBrief}
+              disabled={isBriefing || isLoadingHistory}
+            >
+              {isBriefing ? 'Loading...' : 'Daily brief'}
+            </button>
+            <button
+              type="button"
+              className="voice-mode-toggle whitespace-nowrap"
+              onClick={enterVoiceMode}
+            >
+              Voice mode
+            </button>
+          </div>
+        </div>
 
         <div className="chat-messages" aria-live="polite">
           {messages.map((chatMessage, messageIndex) => (
@@ -396,12 +687,41 @@ export default function Chat() {
             </div>
           ))}
 
-          {isLoadingHistory && <p role="status">Loading your chat...</p>}
-          {isLoading && <p role="status">Thinking...</p>}
+          {isLoadingHistory && (
+            <p className="inline-flex items-center gap-2" role="status">
+              <AgentaMark size={18} animated />
+              Loading your chat...
+            </p>
+          )}
+          {isLoading && (
+            <p className="inline-flex items-center gap-2" role="status">
+              <AgentaMark size={18} animated />
+              Thinking...
+            </p>
+          )}
           {error && <p role="alert">{error}</p>}
         </div>
 
-        <form className="chat-compose" onSubmit={handleSubmit}>
+        {voiceMode && (
+          <div className="voice-panel">
+            <div className={`voice-orb voice-orb-${voiceStatus}`} />
+            <p className="voice-status">
+              {voiceStatus === 'listening' && 'Listening...'}
+              {voiceStatus === 'thinking' && 'Thinking...'}
+              {voiceStatus === 'speaking' && 'Speaking...'}
+              {voiceStatus === 'idle' && 'Starting...'}
+            </p>
+            <button type="button" className="voice-panel-end" onClick={exitVoiceMode}>
+              End voice mode
+            </button>
+          </div>
+        )}
+
+        {/* stays mounted (just hidden) in voice mode so the mic loop can still submit it */}
+        <form
+          className={`chat-compose${voiceMode ? ' chat-compose-hidden' : ''}`}
+          onSubmit={handleSubmit}
+        >
           <div className="chat-input-shell">
             <textarea
               ref={messageInput}
@@ -439,6 +759,14 @@ export default function Chat() {
           </div>
         </form>
       </section>
+      {briefing && (
+        <DailyBriefModal
+          briefing={briefing}
+          onClose={() => setBriefing(null)}
+          onSaveNote={handleSaveBriefNote}
+        />
+      )}
+
       {editingProposal && (
         <ScheduleItemModal
           itemToEdit={editingProposal.proposal}
