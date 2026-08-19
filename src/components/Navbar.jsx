@@ -41,7 +41,7 @@ export default function Navbar({ user, onLogout }) {
             className='mr-2 text-lg font-semibold text-(--text-h)'
             aria-label='agenta home'
           >
-            <AgentaLockup />
+            <AgentaLockup animated />
           </NavLink>
 
           {/* `end` makes "Home" active only on "/" exactly, not on every route. */}
