@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { requestScheduleProposal, requestSpeech } from '../api/ai';
+import {
+  requestDailyBriefing,
+  requestScheduleProposal,
+  requestSpeech,
+} from '../api/ai';
 import {
   loadAiMessages,
   saveAiMessage,
@@ -23,6 +27,7 @@ import {
   hasClarification,
   hasUnresolvedConflict,
 } from '../utils/aiClarification';
+import DailyBriefModal from './DailyBriefModal';
 import AiProposalPreview from './AiProposalPreview';
 import ScheduleItemModal from './ScheduleItemModal';
 import '../styles/chat.css';
@@ -51,6 +56,8 @@ export default function Chat() {
   const [savingItem, setSavingItem] = useState(null);
   const [pendingRequest, setPendingRequest] = useState('');
   const [editingProposal, setEditingProposal] = useState(null);
+  const [briefing, setBriefing] = useState(null);
+  const [isBriefing, setIsBriefing] = useState(false);
   const { addItem } = useSchedule();
   const isSending = useRef(false);
   const isSaving = useRef(false);
@@ -125,6 +132,31 @@ export default function Chat() {
       cancelled = true;
     };
   }, []);
+
+  // Ask the backend to summarize today's schedule and show it in a modal.
+  async function handleDailyBrief() {
+    if (isBriefing) {
+      return;
+    }
+
+    setIsBriefing(true);
+    setError('');
+
+    try {
+      const timeZone =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      setBriefing(await requestDailyBriefing(timeZone));
+    } catch (briefingError) {
+      setError(briefingError.message);
+    } finally {
+      setIsBriefing(false);
+    }
+  }
+
+  // Keeps the brief as a note so it is still there after the modal closes.
+  async function handleSaveBriefNote(title, description) {
+    await addItem({ itemType: 'note', title, description });
+  }
 
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
@@ -664,6 +696,14 @@ export default function Chat() {
           className={`chat-compose${voiceMode ? ' chat-compose-hidden' : ''}`}
           onSubmit={handleSubmit}
         >
+          <button
+            type="button"
+            onClick={handleDailyBrief}
+            disabled={isBriefing || isLoadingHistory}
+          >
+            {isBriefing ? 'Getting your brief...' : 'Daily brief'}
+          </button>
+
           <div className="chat-input-shell">
             <textarea
               ref={messageInput}
@@ -701,6 +741,14 @@ export default function Chat() {
           </div>
         </form>
       </section>
+      {briefing && (
+        <DailyBriefModal
+          briefing={briefing}
+          onClose={() => setBriefing(null)}
+          onSaveNote={handleSaveBriefNote}
+        />
+      )}
+
       {editingProposal && (
         <ScheduleItemModal
           itemToEdit={editingProposal.proposal}
