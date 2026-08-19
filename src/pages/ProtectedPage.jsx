@@ -174,12 +174,12 @@ export default function ProtectedPage() {
           onClearFilters={clearFilters}
           onAddItem={openCreateModal}
           onEditItem={openEditModal}
-          toolbar={icsToolbar}
         />
 
         <MyCalendar
           scheduleItems={filteredItems}
           onEditItem={openEditModal}
+          toolbar={icsToolbar}
         />
 
         <Chat />

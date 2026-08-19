@@ -43,7 +43,7 @@ function eventPropGetter(event) {
     return { className };
 }
 
-export default function MyCalendar({ scheduleItems = [], onEditItem }) {
+export default function MyCalendar({ scheduleItems = [], onEditItem, toolbar}) {
     const [view, setView] = useState('month');
     const [date, setDate] = useState(new Date());
     const { updateItem, removeItem } = useSchedule();
@@ -279,6 +279,12 @@ export default function MyCalendar({ scheduleItems = [], onEditItem }) {
 
     return (
         <div ref={calendarRef} className="calendar-panel" onMouseDownCapture={handleCalendarMouseDown}>
+            {toolbar && (
+                <div className="calendar-actions">
+                    {toolbar}
+                </div>
+            )}
+            
             <DnDCalendar
                 localizer={localizer}
                 events={events}
