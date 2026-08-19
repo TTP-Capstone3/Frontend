@@ -29,7 +29,7 @@
     min-height: 0;
 }
 
-.protected-layout .organizer-panel {
+.protected-layout .organizer-panel-wrap {
     grid-area: organizer;
 }
 
@@ -37,8 +37,92 @@
     grid-area: calendar;
 }
 
-.protected-layout .chat-bar {
+.protected-layout .chat-panel-wrap {
     grid-area: chat;
+}
+
+
+.side-panel-wrap {
+    position: relative;
+    min-height: 0;
+}
+
+.side-panel-toggle {
+    position: absolute;
+    top: 170px;
+    z-index: 2;
+    width: 34px;
+    height: 138px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 0;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: inherit;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* The "Organizer"/"Chat" label, run vertically so it fits the narrow tab. */
+.side-panel-toggle-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.side-panel-toggle-icon {
+    font-size: 20px;
+    line-height: 0.7;
+}
+
+/* Organizer's inner edge is its right edge (next to the calendar) — the tab sits astride that edge, half over the panel and half poking into the middle. */
+/* The -2px margin overlaps the organizer box's own 2px border so no seam shows between the tab and the panel it's attached to. */
+.organizer-panel-wrap .side-panel-toggle {
+    left: 100%;
+    transform: translateY(-50%);
+    margin-left: -2px;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+}
+
+/* Chat's inner edge is its left edge — mirror image of organizer's tab. No border and a background matched to .chat-bar's tint, so it reads as part of the box it's flush against rather than a separate bordered chip. */
+.chat-panel-wrap .side-panel-toggle {
+    right: 100%;
+    transform: translateY(-50%);
+    border: none;
+    background: rgba(106, 106, 106, 0.097);
+    border-radius: 8px 0 0 8px;
+}
+
+/* Starts at its target width and hides overflow so it can collapse to 0. */
+.side-panel {
+    width: 280px;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.side-panel-wrap.is-closed .side-panel {
+    width: 0;
+}
+
+/* Keeps the panel's contents from reflowing/wrapping while the width animates. */
+.side-panel-content {
+    width: 280px;
+    flex-shrink: 0;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Narrowest: one panel at a time, switched with the bottom nav below. */
@@ -48,19 +132,30 @@
         padding-bottom: 12px;
     }
 
-    .protected-layout .organizer-panel,
+    .protected-layout .organizer-panel-wrap,
     .protected-layout .calendar-panel,
-    .protected-layout .chat-bar {
+    .protected-layout .chat-panel-wrap {
         grid-area: panel;
         display: none;
         min-height: 0;
     }
 
-    .protected-layout[data-active-tab="organizer"] .organizer-panel,
+    .protected-layout[data-active-tab="organizer"] .organizer-panel-wrap,
     .protected-layout[data-active-tab="calendar"] .calendar-panel,
-    .protected-layout[data-active-tab="chat"] .chat-bar {
+    .protected-layout[data-active-tab="chat"] .chat-panel-wrap {
         display: flex;
         flex-direction: column;
+    }
+
+    /* The toggle only matters when panels sit side by side; on a single full-width panel there's nothing to slide, so always show it open. */
+    .side-panel-toggle {
+        display: none;
+    }
+
+    .side-panel,
+    .side-panel-wrap.is-closed .side-panel,
+    .side-panel-content {
+        width: 100%;
     }
 
     /* Leaves room so the fixed bottom nav never covers the active panel. */
@@ -69,11 +164,11 @@
     }
 }
 
-/* Above the nav-bar breakpoint: all three panels sit in a single row. */
+/* Above the nav-bar breakpoint: all three panels sit in a single row. The organizer/chat columns are "auto" (sized to their toggle + panel), not a fixed px width, so as a panel's width transitions toward 0 the column shrinks with it and the calendar's 1fr column grows to fill the freed space — same "main content stretches" behavior as a plain sidebar. */
 @media (min-width: 1202px) {
     .protected-layout {
-        gap: 24px;
-        grid-template-columns: 280px 1fr 280px;
+        gap: 50px;
+        grid-template-columns: auto 1fr auto;
         grid-template-areas: "organizer calendar chat";
         align-items: stretch;
     }
@@ -116,24 +211,24 @@
 }
 
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 999px;
+    background: var(--border);
+    border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+    background: var(--accent);
 }

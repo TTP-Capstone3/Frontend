@@ -9,13 +9,13 @@
 
 .organizer-add-button {
   flex: none;
-  margin-right: 12px;
-  margin-top: 6px;
+  margin-right: 16px;
+  transform: translateY(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 8px;
   background: var(--accent);
@@ -35,8 +35,8 @@
   gap: 8px;
   /* Match the calendar's month-view size so the row doesn't grow to fit a
      long item list — the body below scrolls internally instead. */
-  height: 80vh;
-  min-height: 500px;
+  height: 83vh;
+  min-height: 560px;
   box-sizing: border-box;
 }
 
@@ -51,16 +51,19 @@
   display: flex;
   align-items: flex-end;
   gap: 4px;
-  padding: 0 4px;
+  padding: 0;
   flex: 1;
   min-width: 0;
 }
 
 .organizer-tab {
   position: relative;
-  margin-bottom: -10px;
+  /* Buttons carry a UA-default margin in some browsers — zero it out explicitly so the first tab's border lines up with the folder's, instead of relying on it happening to already be 0. */
+  margin: 0 0 -11px;
   padding: 6px 16px;
   border: 2px solid var(--border);
+  /* Being position:relative, every tab paints above the (static) folder box below it, active or not — so its bottom border always shows across the folder's surface unless it's matched to the folder's own background. */
+  border-bottom-color: var(--bg);
   border-radius: 10px 10px 0 0;
   background: color-mix(in srgb, var(--text) 6%, transparent);
   color: var(--text);
@@ -88,7 +91,6 @@
   padding: 9px 20px;
   background: var(--bg);
   color: var(--text-h);
-  border-bottom-color: var(--bg);
   font-size: 1.05em;
 }
 
@@ -103,7 +105,8 @@
   /* Extra left padding keeps the accent stripe and text off the folder's edge. */
   padding: 8px 8px 8px 8px;
   border: 2px solid var(--border);
-  border-radius: 8px 8px 8px 8px;
+  /* Square top-left corner (not rounded like the other three) so the active tab's straight left edge runs straight down into the folder's edge instead of curving away from it right where they meet. */
+  border-radius: 0 8px 8px 8px;
   background: var(--bg);
 }
 
