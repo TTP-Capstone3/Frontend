@@ -23,6 +23,7 @@ import {
   hasClarification,
   hasUnresolvedConflict,
 } from '../utils/aiClarification';
+import AgentaMark from './AgentaMark';
 import AiProposalPreview from './AiProposalPreview';
 import ScheduleItemModal from './ScheduleItemModal';
 import '../styles/chat.css';
@@ -396,8 +397,18 @@ export default function Chat() {
             </div>
           ))}
 
-          {isLoadingHistory && <p role="status">Loading your chat...</p>}
-          {isLoading && <p role="status">Thinking...</p>}
+          {isLoadingHistory && (
+            <p className="inline-flex items-center gap-2" role="status">
+              <AgentaMark size={18} animated />
+              Loading your chat...
+            </p>
+          )}
+          {isLoading && (
+            <p className="inline-flex items-center gap-2" role="status">
+              <AgentaMark size={18} animated />
+              Thinking...
+            </p>
+          )}
           {error && <p role="alert">{error}</p>}
         </div>
 
