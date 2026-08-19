@@ -30,7 +30,7 @@ export default function DailyBriefModal({ briefing, onClose, onSaveNote }) {
   }
 
   return (
-    <Modal title='Daily brief' onClose={onClose}>
+    <Modal title={toBriefingTitle(briefing)} onClose={onClose}>
       <p className='mb-3'>{briefing.summary}</p>
 
       {sections.map((section) => (
@@ -48,7 +48,7 @@ export default function DailyBriefModal({ briefing, onClose, onSaveNote }) {
 
       <div className='schedule-item-form-actions'>
         <button type='button' onClick={handleSaveNote} disabled={isSaving || isSaved}>
-          {isSaved ? 'Saved to notes' : isSaving ? 'Saving...' : 'Save to notes'}
+          {isSaved ? 'Saved to Notes' : isSaving ? 'Saving...' : 'Save to Notes'}
         </button>
         <button type='button' onClick={onClose}>
           Close
