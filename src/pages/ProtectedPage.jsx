@@ -25,11 +25,15 @@ export default function ProtectedPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
 
   const fileInputRef = useRef(null)
+  const chatRef = useRef(null)
   const { scheduleItems, refreshItems } = useSchedule()
 
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [icsMessage, setIcsMessage] = useState(null)
+  // Mirrors Chat's daily-brief loading state so the button living next to
+  // import/export can show the right label without owning the brief logic.
+  const [dailyBriefState, setDailyBriefState] = useState({ isBriefing: false, disabled: false })
 
   function handleSearchChange(value) {
     setFilters((filters) => ({ ...filters, search: value }));
@@ -119,6 +123,10 @@ export default function ProtectedPage() {
     }
   }
 
+  function handleDailyBriefClick() {
+    chatRef.current?.runDailyBrief();
+  }
+
   const filteredItems = scheduleItems.filter((item) => {
     const search = filters.search.trim().toLowerCase();
     const matchesSearch = !search || item.title?.toLowerCase().includes(search) || item.description?.toLowerCase().includes(search);
@@ -155,6 +163,16 @@ export default function ProtectedPage() {
         disabled={isExporting}
       >
         {isExporting ? 'Exporting...' : 'Export .ics'}
+      </button>
+
+      {/* Daily Brief Button */}
+      <button
+        type="button"
+        className="ics-toolbar-button ics-toolbar-button-right"
+        onClick={handleDailyBriefClick}
+        disabled={dailyBriefState.disabled}
+      >
+        {dailyBriefState.isBriefing ? 'Loading...' : 'Generate Daily Brief'}
       </button>
 
       {icsMessage && (
@@ -215,7 +233,7 @@ export default function ProtectedPage() {
           </button>
           <div className="side-panel" id="chat-slide">
             <div className="side-panel-content">
-              <Chat />
+              <Chat ref={chatRef} onDailyBriefStateChange={setDailyBriefState} />
             </div>
           </div>
         </div>

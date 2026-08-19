@@ -1,6 +1,8 @@
 .calendar-panel {
   position: relative;
-  height: 83vh;
+  display: flex;
+  flex-direction: column;
+  height: 87vh;
   min-height: 560px;
   background-color: rgba(106, 106, 106, 0.097);
   border-radius: 1%;
@@ -23,8 +25,20 @@
   }
 }
 
+/* The Import/Export/Daily-brief row above the calendar. It used to sit
+   outside the panel's height math entirely — .rbc-calendar below was
+   "height: 100%" of the whole panel, on top of this row's own height, so the
+   panel was always short by however tall this row is and scrolled on every
+   screen size, not just small ones. Flex + "flex: none" gives it its natural
+   height and takes that back out of what the calendar below gets. */
+.calendar-actions {
+  flex: none;
+  margin-bottom: 14px;
+}
+
 .calendar-panel .rbc-calendar {
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* Slightly smaller than react-big-calendar's default toolbar buttons
@@ -50,7 +64,13 @@
 .calendar-panel .rbc-toolbar .rbc-toolbar-label {
   font-size: 25px;
   font-weight: 600;
-  padding: 12px 0;
+  padding: 4px 0;
+}
+
+/* react-big-calendar's own 10px margin-bottom on the toolbar, on top of the
+   label's padding above, left too much air before the grid's first line. */
+.calendar-panel .rbc-toolbar {
+  margin-bottom: 8px;
 }
 
 
@@ -119,8 +139,11 @@
     margin-bottom: 12px;
   }
 
+  /* Keep Import/Export in the left corner and Daily Brief in the right
+     corner (via .ics-toolbar-button-right's margin-left: auto) instead of
+     collapsing everything to the center. */
   .calendar-actions .ics-toolbar {
-    justify-content: center;
+    width: 100%;
   }
 }
 

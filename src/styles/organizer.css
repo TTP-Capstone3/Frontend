@@ -35,7 +35,7 @@
   gap: 8px;
   /* Match the calendar's month-view size so the row doesn't grow to fit a
      long item list — the body below scrolls internally instead. */
-  height: 83vh;
+  height: 87vh;
   min-height: 560px;
   box-sizing: border-box;
 }

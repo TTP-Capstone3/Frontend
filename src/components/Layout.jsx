@@ -17,7 +17,7 @@ export default function Layout({ user, onLogout, authError }) {
       <main
         className={
           isAppPage
-            ? 'flex w-full flex-1 flex-col px-4 py-8'
+            ? 'flex w-full flex-1 flex-col px-4 pt-4 pb-8'
             : 'mx-auto w-full max-w-3xl flex-1 px-4 py-8'
         }
       >
