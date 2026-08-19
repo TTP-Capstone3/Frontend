@@ -147,6 +147,10 @@ export default function Chat() {
       const timeZone =
         Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
       setBriefing(await requestDailyBriefing(timeZone));
+      setMessages((currentMessages) => [...currentMessages, {
+        sender: 'ai',
+        text: 'Your daily brief has been created.',
+      }])
     } catch (briefingError) {
       setError(briefingError.message);
     } finally {
@@ -696,6 +700,12 @@ export default function Chat() {
             <p className="inline-flex items-center gap-2" role="status">
               <AgentaMark size={18} animated />
               Thinking...
+            </p>
+          )}
+          {isBriefing && (
+            <p className="inline-flex items-center gap-2" role="status">
+              <AgentaMark size={18} animated />
+              Creating your daily brief...
             </p>
           )}
           {error && <p role="alert">{error}</p>}

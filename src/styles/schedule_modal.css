@@ -33,7 +33,7 @@
 
 .modal-header button {
   display: inline-flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   width: 32px;
   height: 32px;
