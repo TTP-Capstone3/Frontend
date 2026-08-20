@@ -6,7 +6,8 @@ export default function AgentaLockup({ size = 50, animated = false }) {
   return (
     <span className='inline-flex items-center gap-2'>
       <AgentaMark size={size} animated={animated} />
-      <span className='font-bold tracking-tight'>agenta</span>
+      {/* Hidden at phone widths so the navbar keeps just the mark. */}
+      <span className='font-bold tracking-tight max-[480px]:hidden'>agenta</span>
     </span>
   );
 }
