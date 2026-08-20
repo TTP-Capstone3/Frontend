@@ -109,10 +109,12 @@ const Chat = forwardRef(function Chat({ onDailyBriefStateChange }, ref) {
   }, [messages]);
 
   // Autoscrolls to the newest message whenever the conversation grows or a
-  // status line (Thinking..., Creating your daily brief...) appears.
+  // status line (Thinking..., Creating your daily brief...) appears. Also
+  // keyed on voiceStatus so voice mode scrolls down the moment a prompt is
+  // sent, not only once the reply message shows up.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages, isLoading, isBriefing, isLoadingHistory]);
+  }, [messages, isLoading, isBriefing, isLoadingHistory, voiceStatus]);
 
   // Keeps the parent's copy of the daily-brief loading state in sync so its
   // button (next to import/export) can show the right label and disable itself.
@@ -323,7 +325,7 @@ const Chat = forwardRef(function Chat({ onDailyBriefStateChange }, ref) {
     await handleConfirm(pending.messageIndex, pending.itemIndex, pending.proposal);
 
     if (voiceModeActiveRef.current) {
-      startVoiceListening();
+      resumeVoiceListening();
     }
   }
 
@@ -333,8 +335,19 @@ const Chat = forwardRef(function Chat({ onDailyBriefStateChange }, ref) {
     await handleCancel(pending.messageIndex, pending.itemIndex);
 
     if (voiceModeActiveRef.current) {
-      startVoiceListening();
+      resumeVoiceListening();
     }
+  }
+
+  // gives the user a moment to read the reply/card and gather their thoughts
+  // instead of the mic jumping back on the instant a reply shows up
+  const VOICE_LISTEN_RESUME_DELAY_MS = 1500;
+  function resumeVoiceListening() {
+    setTimeout(() => {
+      if (voiceModeActiveRef.current) {
+        startVoiceListening();
+      }
+    }, VOICE_LISTEN_RESUME_DELAY_MS);
   }
 
   // "edit" opens the same edit form the button does, which needs typing, so
@@ -603,7 +616,7 @@ const Chat = forwardRef(function Chat({ onDailyBriefStateChange }, ref) {
 
       // reply is shown in the chat as text - just keep listening for the next turn
       if (isVoiceReply && voiceModeActiveRef.current) {
-        startVoiceListening();
+        resumeVoiceListening();
       }
     } catch (requestError) {
       setError(requestError.message);
