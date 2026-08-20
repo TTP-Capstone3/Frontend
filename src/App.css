@@ -7,7 +7,7 @@
 .ics-toolbar-button {
     padding: 4px 8px;
     font-size: 0.85em;
-    border: 1px solid var(--bg);
+    border: none;
     border-radius: 8px;
     background: rgba(106, 106, 106, 0.097);
 }
