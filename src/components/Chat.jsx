@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import {
   requestDailyBriefing,
   requestScheduleProposal,
@@ -32,7 +32,10 @@ import AiProposalPreview from './AiProposalPreview';
 import ScheduleItemModal from './ScheduleItemModal';
 import '../styles/chat.css';
 
-export default function Chat() {
+// `onDailyBriefStateChange` lets the parent (which hosts the Daily brief
+// button next to the calendar's import/export controls) mirror the loading
+// state; `ref` exposes `runDailyBrief` so the parent's button can trigger it.
+const Chat = forwardRef(function Chat({ onDailyBriefStateChange }, ref) {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +64,9 @@ export default function Chat() {
   const isSending = useRef(false);
   const isSaving = useRef(false);
   const messageInput = useRef(null);
+  // marks the bottom of the message list so we can scroll it into view whenever
+  // a new message (or a status line like "Thinking...") shows up
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!messageInput.current) {
@@ -101,6 +107,18 @@ export default function Chat() {
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  // Autoscrolls to the newest message whenever the conversation grows or a
+  // status line (Thinking..., Creating your daily brief...) appears.
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, isLoading, isBriefing, isLoadingHistory]);
+
+  // Keeps the parent's copy of the daily-brief loading state in sync so its
+  // button (next to import/export) can show the right label and disable itself.
+  useEffect(() => {
+    onDailyBriefStateChange?.({ isBriefing, disabled: isBriefing || isLoadingHistory });
+  }, [isBriefing, isLoadingHistory, onDailyBriefStateChange]);
 
   // Bring the saved conversation back when the chat opens. The cancelled flag
   // keeps the second run React does in development from setting state twice.
@@ -160,6 +178,10 @@ export default function Chat() {
   async function handleSaveBriefNote(title, description) {
     await addItem({ itemType: 'note', title, description });
   }
+
+  // Lets the Daily brief button living next to the calendar's import/export
+  // controls trigger the same flow that lives here alongside the chat state.
+  useImperativeHandle(ref, () => ({ runDailyBrief: handleDailyBrief }));
 
   function handleEdit(messageIndex, itemIndex, proposal) {
     setEditingProposal({ messageIndex, itemIndex, proposal });
@@ -605,26 +627,11 @@ export default function Chat() {
   return (
     <>
       <section className="chat-bar">
-        <h2>AI Assistant</h2>
         <div className="chat-header">
           <h2>Chat</h2>
-          <div className="inline-flex items-center gap-2">
-            <button
-              type="button"
-              className="voice-mode-toggle whitespace-nowrap"
-              onClick={handleDailyBrief}
-              disabled={isBriefing || isLoadingHistory}
-            >
-              {isBriefing ? 'Loading...' : 'Daily brief'}
-            </button>
-            <button
-              type="button"
-              className="voice-mode-toggle whitespace-nowrap"
-              onClick={enterVoiceMode}
-            >
-              Voice mode
-            </button>
-          </div>
+          <button type="button" className="voice-mode-toggle" onClick={enterVoiceMode}>
+            Voice mode
+          </button>
         </div>
 
         <div className="chat-messages" aria-live="polite">
@@ -683,6 +690,7 @@ export default function Chat() {
             </p>
           )}
           {error && <p role="alert">{error}</p>}
+          <div ref={messagesEndRef} />
         </div>
 
         {voiceMode && (
@@ -758,4 +766,6 @@ export default function Chat() {
       )}
     </>
   );
-}
+});
+
+export default Chat;

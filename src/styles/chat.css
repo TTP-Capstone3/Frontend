@@ -6,7 +6,7 @@
     padding: 16px;
     border-radius: 8px;
     background: rgba(106, 106, 106, 0.097);
-    height: 83vh;
+    height: 87vh;
     min-height: 560px;
 }
 
@@ -287,11 +287,11 @@
 }
 
 .voice-mode-toggle {
-    padding: 6px 12px;
+    padding: 4px 6px;
     border-radius: 8px;
     border: 1px solid var(--border);
-    background: var(--code-bg);
-    color: var(--text-h);
+    background: rgba(106, 106, 106, 0.097);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
 }

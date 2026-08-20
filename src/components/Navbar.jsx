@@ -44,8 +44,7 @@ export default function Navbar({ user, onLogout }) {
             <AgentaLockup animated />
           </NavLink>
 
-          {/* `end` makes "Home" active only on "/" exactly, not on every route. */}
-          <NavLink to='/' end className={linkClass}>
+          <NavLink to='/' end className={(props) => `${linkClass(props)} max-[650px]:hidden`}>
             Home
           </NavLink>
 
@@ -83,7 +82,7 @@ export default function Navbar({ user, onLogout }) {
                 onClick={onLogout}
                 className='rounded-md px-3 py-2.5 text-sm font-medium hover:text-(--text-h)'
               >
-                Log out
+                Logout
               </button>
             </>
           ) : (
