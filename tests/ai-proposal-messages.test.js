@@ -26,6 +26,20 @@ test('cancel removes only the selected proposal', () => {
   assert.equal(messages[1].items[0].proposal.title, 'Breakfast');
 });
 
+test('cancel updates the message text for what is left', () => {
+  const messages = removeProposal(makeMessages(), 1, 1);
+
+  assert.equal(messages[1].text, 'Please review this item:');
+});
+
+test('cancel leaves a note when the last proposal is cancelled', () => {
+  const oneItem = removeProposal(makeMessages(), 1, 1);
+  const bothCancelled = removeProposal(oneItem, 1, 0);
+
+  assert.equal(bothCancelled[1].items.length, 0);
+  assert.equal(bothCancelled[1].text, 'Suggestion canceled.');
+});
+
 test('confirm marks only the selected proposal as saved', () => {
   const messages = markProposalSaved(makeMessages(), 1, 0);
 
