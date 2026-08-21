@@ -12,6 +12,9 @@
   --accent-border: rgba(0, 116, 202, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* bigger, more visible version of --shadow for large elements like the about page mockup */
+  --shadow-hero:
+    rgba(0, 0, 0, 0.18) 0 30px 60px -12px, rgba(0, 0, 0, 0.1) 0 10px 20px -8px;
 
   --sans: 'Manrope', system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: 'Manrope', system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -45,6 +48,8 @@
     --accent-border: rgba(96, 170, 243, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    --shadow-hero:
+      rgba(0, 0, 0, 0.55) 0 30px 60px -12px, rgba(0, 0, 0, 0.3) 0 10px 20px -8px;
   }
 }
 
@@ -61,6 +66,8 @@
   --accent-border: rgba(96, 170, 243, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  --shadow-hero:
+    rgba(0, 0, 0, 0.55) 0 30px 60px -12px, rgba(0, 0, 0, 0.3) 0 10px 20px -8px;
 }
 
 /* Colors used when the navbar toggle is switched to light mode. */
@@ -76,6 +83,8 @@
   --accent-border: rgba(0, 116, 202, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --shadow-hero:
+    rgba(0, 0, 0, 0.18) 0 30px 60px -12px, rgba(0, 0, 0, 0.1) 0 10px 20px -8px;
 }
 
 body {
