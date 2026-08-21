@@ -1,14 +1,22 @@
+import { getAiResponseText } from './aiClarification.js';
+
 export function removeProposal(messages, messageIndex, itemIndex) {
   return messages.map((chatMessage, currentMessageIndex) => {
     if (currentMessageIndex !== messageIndex) {
       return chatMessage;
     }
 
+    const items = chatMessage.items.filter(
+      (_, currentItemIndex) => currentItemIndex !== itemIndex,
+    );
+
+    // Keeps the message text in sync so a cancelled proposal doesn't leave
+    // a stale "please review this item" behind - recomputes it for whatever
+    // is left, or falls back to a plain cancelled note when nothing is.
     return {
       ...chatMessage,
-      items: chatMessage.items.filter(
-        (_, currentItemIndex) => currentItemIndex !== itemIndex,
-      ),
+      items,
+      text: getAiResponseText(items) || 'Suggestion canceled.',
     };
   });
 }
