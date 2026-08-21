@@ -87,7 +87,7 @@ export default function ProtectedPage() {
       const result = await importCalendar(file);
       await refreshItems();
 
-      setIcsMessage(`Imported ${result.importedCount} event(s). ` + `${result.skippedCount} skipped.`);
+      setIcsMessage(`Imported ${result.importedCount} item(s). ` + `${result.skippedCount} skipped.`);
     } catch (error) {
       setIcsMessage(error.message);
     } finally {
