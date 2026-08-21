@@ -1,0 +1,11 @@
+.about-screenshot-dark {
+    display: none;
+}
+
+:root[data-theme='dark'] .about-screenshot-light {
+    display: none;
+}
+
+:root[data-theme='dark'] .about-screenshot-dark {
+    display: block;
+}

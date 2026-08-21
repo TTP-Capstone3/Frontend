@@ -1,5 +1,7 @@
 import { Link } from 'react-router';
-import calendarScreenshot from '../assets/calendar-screenshot.jpg';
+import calendarScreenshotLight from '../assets/calendar-screenshot-light.jpg';
+import calendarScreenshotDark from '../assets/calendar-screenshot-dark.jpg';
+import '../styles/about.css';
 
 // Shown in the "Built by" section at the bottom of the page.
 const team = [
@@ -44,8 +46,9 @@ export default function AboutPage({ user }) {
 
       {/* Breaks out of the page's normal max-w-3xl so the image can go wider. */}
       <div className='relative left-1/2 mb-16 w-screen -translate-x-1/2 px-4'>
-        <div className='mx-auto max-w-6xl overflow-hidden rounded-lg border border-(--border)'>
-          <img src={calendarScreenshot} alt='The calendar and AI chat' className='w-full' />
+        <div className='mx-auto max-w-6xl overflow-hidden rounded-lg border border-(--border) shadow-[var(--shadow-hero)]'>
+          <img src={calendarScreenshotLight} alt='The calendar and AI chat' className='w-full about-screenshot-light' />
+          <img src={calendarScreenshotDark} alt='The calendar and AI chat' className='w-full about-screenshot-dark' />
         </div>
       </div>
 
